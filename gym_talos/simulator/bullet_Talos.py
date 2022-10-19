@@ -44,16 +44,21 @@ class TalosDeburringSimulator:
         p.loadURDF("plane.urdf")
 
     def _setupRobot(self, URDF, rmodelComplete, controlledJointsIDs):
+        rmodelComplete.q0 = rmodelComplete.referenceConfigurations["half_sitting"]
+        self.q0 = rmodelComplete.q0
+        self.initial_base_position = list(self.q0[:3])
+        self.initial_base_orientation = list(self.q0[3:7])
+        self.initial_joint_positions = list(self.q0[7:])
+
         rmodelComplete.armature = (
             rmodelComplete.rotorInertia * rmodelComplete.rotorGearRatio**2
         )
-        rmodelComplete.q0 = rmodelComplete.referenceConfigurations["half_sitting"]
 
         # Load robot
         self.robotId = p.loadURDF(
             URDF,
-            list(rmodelComplete.q0[:3]),
-            list(rmodelComplete.q0[3:7]),
+            self.initial_base_position,
+            self.initial_base_orientation,
             useFixedBase=False,
         )
 
@@ -74,22 +79,21 @@ class TalosDeburringSimulator:
             for i in controlledJointsIDs[1:]
         ]
 
-        self._setInitialConfig(rmodelComplete)
+        self._setInitialConfig()
         self._changeFriction(["leg_left_6_joint", "leg_right_6_joint"], 100, 30)
         self._setControlledJoints()
 
-    def _setInitialConfig(self, rmodelComplete):
+    def _setInitialConfig(self):
         """Initialize robot configuration in pyBullet
 
         :param q0 Intial robot configuration
         """
-        initial_joint_positions = np.array(rmodelComplete.q0[7:].flat).tolist()
-        for i in range(len(initial_joint_positions)):
+        for i in range(len(self.initial_joint_positions)):
             p.enableJointForceTorqueSensor(self.robotId, i, True)
             p.resetJointState(
                 self.robotId,
                 self.bulletJointsIdInPinOrder[i],
-                initial_joint_positions[i],
+                self.initial_joint_positions[i],
             )
 
     def _changeFriction(self, names, lateralFriction=100, spinningFriction=30):
@@ -176,6 +180,25 @@ class TalosDeburringSimulator:
             controlMode=p.TORQUE_CONTROL,
             forces=torques,
         )
+
+    def reset(self):
+        # Reset base
+        p.resetBasePositionAndOrientation(
+            self.robotId,
+            self.initial_base_position,
+            self.initial_base_orientation,
+            self.physicsClient,
+        )
+        p.resetBaseVelocity(
+            self.robotId, [0.0, 0.0, 0.0], [0.0, 0.0, 0.0], self.physicsClient
+        )
+        # Reset joints
+        for i in range(len(self.initial_joint_positions)):
+            p.resetJointState(
+                self.robotId,
+                self.bulletJointsIdInPinOrder[i],
+                self.initial_joint_positions[i],
+            )
 
     def end(self):
         """Ends connection with pybullet."""
