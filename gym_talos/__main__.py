@@ -46,18 +46,29 @@ designer_conf = dict(
 )
 targetPos = [0.6, 0.4, 1.1]
 
+
+def play(model, targetPos, designer_conf):
+    env = EnvTalosBase(targetPos, designer_conf, GUI=True)
+    print("Null model")
+    obs = env.reset()
+    while True:
+        action, _ = model.predict(obs, deterministic=True)
+        # print(counter," - action: ",[round(a,4) for a in action])
+        # input("...")
+        obs, reward, done, _ = env.step(action)
+        if done:
+            # print("Max torques : ",env.robot.max_torques)
+            input("Press to restart ...")
+            env.reset()
+    return None
+
+
 env = EnvTalosBase(targetPos, designer_conf)
 # env = DummyVecEnv([lambda: EnvTalosBase(targetPos, designer_conf)])
 # # Automatically normalize the input features and reward
 # env = VecNormalize(env, norm_obs=True, norm_reward=False,
 #                    clip_obs=10.)
-model = SAC("MlpPolicy", env, verbose=1, tensorboard_log="./logs")
-model.learn(total_timesteps=100000)
+model = PPO("MlpPolicy", env, verbose=1, tensorboard_log="./logs")
+model.learn(total_timesteps=10000)
 
-obs = env.reset()
-while True:
-    action, _states = model.predict(obs, deterministic=True)
-    obs, reward, done, info = env.step(action)
-    env.render()
-    if done:
-        obs = env.reset()
+play(model, targetPos, designer_conf)
