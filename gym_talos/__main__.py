@@ -1,4 +1,5 @@
 from stable_baselines3 import SAC, PPO
+from stable_baselines3.common.vec_env import DummyVecEnv, VecNormalize
 from stable_baselines3.common.env_checker import check_env
 
 from gym_talos.envs.env_talos_base import EnvTalosBase
@@ -28,9 +29,6 @@ controlledJoints = [
     "arm_left_2_joint",
     "arm_left_3_joint",
     "arm_left_4_joint",
-    "arm_left_5_joint",
-    "arm_left_6_joint",
-    "arm_left_7_joint",
     "arm_right_1_joint",
     "arm_right_2_joint",
     "arm_right_3_joint",
@@ -49,14 +47,17 @@ designer_conf = dict(
 targetPos = [0.6, 0.4, 1.1]
 
 env = EnvTalosBase(targetPos, designer_conf)
-check_env(env)
-model = PPO("MlpPolicy", env, verbose=1)
+# env = DummyVecEnv([lambda: EnvTalosBase(targetPos, designer_conf)])
+# # Automatically normalize the input features and reward
+# env = VecNormalize(env, norm_obs=True, norm_reward=False,
+#                    clip_obs=10.)
+model = SAC("MlpPolicy", env, verbose=1, tensorboard_log="./logs")
 model.learn(total_timesteps=100000)
 
-# obs = env.reset()
-# while True:
-#     action, _states = model.predict(obs, deterministic=True)
-#     obs, reward, done, info = env.step(action)
-#     env.render()
-#     if done:
-#         obs = env.reset()
+obs = env.reset()
+while True:
+    action, _states = model.predict(obs, deterministic=True)
+    obs, reward, done, info = env.step(action)
+    env.render()
+    if done:
+        obs = env.reset()

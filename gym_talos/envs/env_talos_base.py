@@ -29,23 +29,75 @@ class EnvTalosBase(gym.Env):
             rmodelComplete=self.pinWrapper.get_rModelComplete(),
             controlledJointsIDs=self.pinWrapper.get_controlledJointsIDs(),
             enableGUI=False,
+            dt=1e-4,
         )
 
         # Parameters
         self.maxTime = 1000
-        self.weight_posture = 1
-        self.weight_command = 0
+        self.weight_posture = 10
+        self.weight_command = 1
         self.desired_state = self.pinWrapper.get_x0()
+        self.torqueScale = np.array(
+            [
+                99,
+                159,
+                159,
+                299,
+                159,
+                99,
+                99,
+                159,
+                159,
+                299,
+                159,
+                99,
+                144,
+                144,
+                144,
+                144,
+                90,
+                90,
+                144,
+                144,
+                90,
+                90,
+            ]
+        )
+
+        self.lowerObsLim = np.concatenate(
+            (
+                self.pinWrapper.get_rModel().lowerPositionLimit,
+                -self.pinWrapper.get_rModel().velocityLimit,
+            ),
+        )
+        self.lowerObsLim[:7] = -5
+        self.lowerObsLim[
+            self.pinWrapper.get_rModel().nq : self.pinWrapper.get_rModel().nq + 6
+        ] = -5
+
+        self.upperObsLim = np.concatenate(
+            (
+                self.pinWrapper.get_rModel().upperPositionLimit,
+                self.pinWrapper.get_rModel().velocityLimit,
+            ),
+        )
+        self.upperObsLim[:7] = 5
+        self.upperObsLim[
+            self.pinWrapper.get_rModel().nq : self.pinWrapper.get_rModel().nq + 6
+        ] = 5
+
+        self.avgObs = (self.upperObsLim + self.lowerObsLim) / 2
+        self.diffObs = self.upperObsLim - self.lowerObsLim
 
         # Environment variables
         action_dim = len(designer_conf["controlledJointsNames"]) - 1
         self.action_space = gym.spaces.Box(
-            low=-100, high=100, shape=(action_dim,), dtype=np.float64
+            low=-1, high=1, shape=(action_dim,), dtype=np.float32
         )
 
         observation_dim = self.desired_state.size
         self.observation_space = gym.spaces.Box(
-            low=-100, high=100, shape=(observation_dim,), dtype=np.float64
+            low=-1, high=1, shape=(observation_dim,), dtype=np.float64
         )
 
         self.timer = 0
@@ -65,21 +117,23 @@ class EnvTalosBase(gym.Env):
     def step(self, action):
         self.timer += 1
 
-        self.simulator.step(action)
+        for i in range(10):
+            self.simulator.step(self._scaleAction(action))
 
         x_measured = self.simulator.getRobotState()
 
-        self.pinWrapper.updateReducedModel(x_measured)
-
-        observation = self._getObservation()
+        observation = self._getObservation(x_measured)
         reward = self._getReward(action, observation)
         terminated = self._checkTermination()
         # truncated = self._checkTruncation()
 
         return observation, reward, terminated, {}
 
-    def _getObservation(self):
-        return np.float32(self.pinWrapper.get_x0())
+    def _scaleAction(self, action):
+        return self.torqueScale * action
+
+    def _getObservation(self, x_measured):
+        return (x_measured - self.avgObs) / self.diffObs
 
     def _getReward(self, action, observation):
         reward = 0
