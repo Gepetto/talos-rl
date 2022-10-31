@@ -1,3 +1,40 @@
+env:
+  numSimulationSteps: 10
+  normalizeObs: True
+  # Action normalization scale
+  torqueScale:
+    [
+      99,
+      159,
+      159,
+      299,
+      159,
+      99,
+      99,
+      159,
+      159,
+      299,
+      159,
+      99,
+      144,
+      144,
+      144,
+      144,
+      90,
+      90,
+      144,
+      144,
+      90,
+      90,
+    ]
+  # Stop conditions
+  maxTime: 1000
+  minHeight: 0.6 # if 0 no check is performed on the height of the robot
+  # Reward parameters
+  weightPosture: 1
+  weightCommand: 0.5
+  weightAlive: 4
+
 designer:
   leftFootName: "left_sole_link"
   rightFootName: "right_sole_link"
@@ -31,4 +68,3 @@ designer:
       arm_right_4_joint,
     ]
   toolFramePos: [0, -0.02, -0.0825]
-
