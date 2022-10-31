@@ -8,7 +8,7 @@ from gym_talos.simulator.bullet_Talos import TalosDeburringSimulator
 
 
 class EnvTalosBase(gym.Env):
-    def __init__(self, targetPos, designer_conf, GUI=False) -> None:
+    def __init__(self, designer_conf, GUI=False) -> None:
 
         # Robot wrapper
         self.pinWrapper = RobotDesigner()
@@ -25,7 +25,6 @@ class EnvTalosBase(gym.Env):
         # Simulator
         self.simulator = TalosDeburringSimulator(
             URDF=designer_conf["urdfPath"],
-            targetPos=targetPos,
             rmodelComplete=self.pinWrapper.get_rModelComplete(),
             controlledJointsIDs=self.pinWrapper.get_controlledJointsIDs(),
             enableGUI=GUI,
@@ -34,8 +33,8 @@ class EnvTalosBase(gym.Env):
 
         # Parameters
         self.maxTime = 500
-        self.weight_posture = 10
-        self.weight_command = 1
+        self.weight_posture = 1
+        self.weight_command = 0
         self.desired_state = self.pinWrapper.get_x0()
         self.torqueScale = np.array(
             [
@@ -129,6 +128,9 @@ class EnvTalosBase(gym.Env):
 
         return observation, reward, terminated, {}
 
+    def close(self):
+        self.simulator.end()
+
     def _scaleAction(self, action):
         return self.torqueScale * action
 
@@ -148,7 +150,7 @@ class EnvTalosBase(gym.Env):
         return reward
 
     def _checkTermination(self, x_measured):
-        return (self.timer > (self.maxTime - 1)) or (x_measured[2] < 0.7)
+        return self.timer > (self.maxTime - 1)  # or (x_measured[2] < 0.6)
 
     def _checkTruncation(self):
         raise NotImplementedError
