@@ -1,3 +1,6 @@
+training:
+  totalTimesteps: 1000000
+
 env:
   numSimulationSteps: 10
   normalizeObs: True
