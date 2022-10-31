@@ -7,7 +7,6 @@ class TalosDeburringSimulator:
     def __init__(
         self,
         URDF,
-        targetPos,
         rmodelComplete,
         controlledJointsIDs,
         enableGUI=False,
@@ -18,9 +17,6 @@ class TalosDeburringSimulator:
         self._setupBullet(enableGUI, enableGravity, dt)
 
         self._setupRobot(URDF, rmodelComplete, controlledJointsIDs)
-
-        # Create visuals
-        self._createTargetVisual(targetPos)
 
     def _setupBullet(self, enableGUI, enableGravity, dt):
         # Start the client for PyBullet
@@ -62,8 +58,13 @@ class TalosDeburringSimulator:
             useFixedBase=False,
         )
 
-        # Magic translation from bullet where the basis center is shifted
+        # Fetching the position of the center of mass
+        # (which is different from the origin of the root link)
         self.localInertiaPos = p.getDynamicsInfo(self.robotId, -1)[3]
+
+        # Expressing initial position wrt the CoM
+        for i in range(3):
+            self.initial_base_position[i] += self.localInertiaPos[i]
 
         self.names2bulletIndices = {
             p.getJointInfo(1, i)[1].decode(): i for i in range(p.getNumJoints(1))
