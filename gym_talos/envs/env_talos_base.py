@@ -2,7 +2,7 @@ import gym
 import numpy as np
 import pinocchio as pin
 
-from sobec import RobotDesigner
+from deburring_mpc import RobotDesigner
 
 from gym_talos.simulator.bullet_Talos import TalosDeburringSimulator
 
@@ -33,15 +33,15 @@ class EnvTalosBase(gym.Env):
         gripper_SE3_tool.translation[0] = params_designer["toolFramePos"][0]
         gripper_SE3_tool.translation[1] = params_designer["toolFramePos"][1]
         gripper_SE3_tool.translation[2] = params_designer["toolFramePos"][2]
-        self.pinWrapper.addEndEffectorFrame(
+        self.pinWrapper.add_end_effector_frame(
             "deburring_tool", "gripper_left_fingertip_3_link", gripper_SE3_tool
         )
 
         # Simulator
         self.simulator = TalosDeburringSimulator(
-            URDF=params_designer["urdfPath"],
-            rmodelComplete=self.pinWrapper.get_rModelComplete(),
-            controlledJointsIDs=self.pinWrapper.get_controlledJointsIDs(),
+            URDF=params_designer["urdf_path"],
+            rmodelComplete=self.pinWrapper.get_rmodel_complete(),
+            controlledJointsIDs=self.pinWrapper.get_controlled_joints_ids(),
             enableGUI=GUI,
             dt=1e-4,
         )
@@ -52,7 +52,7 @@ class EnvTalosBase(gym.Env):
             self._init_obsNormalizer()
         self.desired_state = self.pinWrapper.get_x0()
 
-        action_dim = len(params_designer["controlledJointsNames"]) - 1
+        action_dim = len(params_designer["controlled_joints_names"]) - 1
         self.action_space = gym.spaces.Box(
             low=-1, high=1, shape=(action_dim,), dtype=np.float32
         )
@@ -73,7 +73,7 @@ class EnvTalosBase(gym.Env):
         self.simulator.reset()
 
         x_measured = self.simulator.getRobotState()
-        self.pinWrapper.updateReducedModel(x_measured)
+        self.pinWrapper.update_reduced_model(x_measured)
 
         return np.float32(self.pinWrapper.get_x0())
 
@@ -131,24 +131,24 @@ class EnvTalosBase(gym.Env):
     def _init_obsNormalizer(self):
         self.lowerObsLim = np.concatenate(
             (
-                self.pinWrapper.get_rModel().lowerPositionLimit,
-                -self.pinWrapper.get_rModel().velocityLimit,
+                self.pinWrapper.get_rmodel().lowerPositionLimit,
+                -self.pinWrapper.get_rmodel().velocityLimit,
             ),
         )
         self.lowerObsLim[:7] = -5
         self.lowerObsLim[
-            self.pinWrapper.get_rModel().nq : self.pinWrapper.get_rModel().nq + 6
+            self.pinWrapper.get_rmodel().nq : self.pinWrapper.get_rmodel().nq + 6
         ] = -5
 
         self.upperObsLim = np.concatenate(
             (
-                self.pinWrapper.get_rModel().upperPositionLimit,
-                self.pinWrapper.get_rModel().velocityLimit,
+                self.pinWrapper.get_rmodel().upperPositionLimit,
+                self.pinWrapper.get_rmodel().velocityLimit,
             ),
         )
         self.upperObsLim[:7] = 5
         self.upperObsLim[
-            self.pinWrapper.get_rModel().nq : self.pinWrapper.get_rModel().nq + 6
+            self.pinWrapper.get_rmodel().nq : self.pinWrapper.get_rmodel().nq + 6
         ] = 5
 
         self.avgObs = (self.upperObsLim + self.lowerObsLim) / 2

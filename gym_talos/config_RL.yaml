@@ -19,32 +19,32 @@ env:
       299,
       159,
       99,
-      144,
-      144,
-      144,
-      144,
-      90,
-      90,
-      144,
-      144,
-      90,
-      90,
+      # 144,
+      # 144,
+      # 144,
+      # 144,
+      # 90,
+      # 90,
+      # 144,
+      # 144,
+      # 90,
+      # 90,
     ]
   # Stop conditions
   maxTime: 1000
-  minHeight: 0.6 # if 0 no check is performed on the height of the robot
+  minHeight: 0.8 # if 0 no check is performed on the height of the robot
   # Reward parameters
   weightPosture: 1
   weightCommand: 0.5
-  weightAlive: 4
+  weightAlive: 2
 
 designer:
-  leftFootName: "left_sole_link"
-  rightFootName: "right_sole_link"
-  urdfPath: "/opt/openrobots/share/example-robot-data/robots/talos_data/robots/talos_reduced.urdf"
-  srdfPath: "/opt/openrobots/share/example-robot-data/robots/talos_data/srdf/talos.srdf"
-  robotDescription: ""
-  controlledJointsNames:
+  left_foot_name: "left_sole_link"
+  right_foot_name: "right_sole_link"
+  urdf_path: "/opt/openrobots/share/example-robot-data/robots/talos_data/robots/talos_reduced.urdf"
+  srdf_path: "/opt/openrobots/share/example-robot-data/robots/talos_data/srdf/talos.srdf"
+  robot_description: ""
+  controlled_joints_names:
     [
       root_joint,
       leg_left_1_joint,
@@ -59,15 +59,15 @@ designer:
       leg_right_4_joint,
       leg_right_5_joint,
       leg_right_6_joint,
-      torso_1_joint,
-      torso_2_joint,
-      arm_left_1_joint,
-      arm_left_2_joint,
-      arm_left_3_joint,
-      arm_left_4_joint,
-      arm_right_1_joint,
-      arm_right_2_joint,
-      arm_right_3_joint,
-      arm_right_4_joint,
+      # torso_1_joint,
+      # torso_2_joint,
+      # arm_left_1_joint,
+      # arm_left_2_joint,
+      # arm_left_3_joint,
+      # arm_left_4_joint,
+      # arm_right_1_joint,
+      # arm_right_2_joint,
+      # arm_right_3_joint,
+      # arm_right_4_joint,
     ]
   toolFramePos: [0, -0.02, -0.0825]
