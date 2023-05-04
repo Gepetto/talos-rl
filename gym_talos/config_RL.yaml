@@ -33,18 +33,17 @@ env:
   # Stop conditions
   maxTime: 1000
   minHeight: 0.8 # if 0 no check is performed on the height of the robot
+  # Target
+  targetPosition: [0.6,0.4,1.1]
   # Reward parameters
   weightPosture: 1
   weightCommand: 0.5
   weightAlive: 2
 
 designer:
-  left_foot_name: "left_sole_link"
-  right_foot_name: "right_sole_link"
-  urdf_path: "/opt/openrobots/share/example-robot-data/robots/talos_data/robots/talos_reduced.urdf"
-  srdf_path: "/opt/openrobots/share/example-robot-data/robots/talos_data/srdf/talos.srdf"
-  robot_description: ""
-  controlled_joints_names:
+  URDF: "/robots/talos_data/robots/talos_reduced.urdf"
+  SRDF: "/robots/talos_data/srdf/talos.srdf"
+  controlledJoints:
     [
       root_joint,
       leg_left_1_joint,
@@ -70,4 +69,4 @@ designer:
       # arm_right_3_joint,
       # arm_right_4_joint,
     ]
-  toolFramePos: [0, -0.02, -0.0825]
+  toolPosition: [0, -0.02, -0.0825]
