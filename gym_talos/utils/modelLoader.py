@@ -4,12 +4,16 @@ import pinocchio as pin
 
 
 class TalosDesigner:
-    def __init__(self, URDF, SRDF, toolPosition, controlledJoints):
+    def __init__(self, URDF, SRDF, toolPosition, controlledJoints, **kwargs):
         modelPath = example_robot_data.getModelPath(URDF)
+        self.URDF_path = modelPath + URDF
 
-        self.rmodelComplete = pin.buildModelFromUrdf(
-            modelPath + URDF, pin.JointModelFreeFlyer()
-        )
+        if True:
+            self.rmodelComplete = pin.buildModelFromUrdf(
+                self.URDF_path, pin.JointModelFreeFlyer()
+            )
+        else:
+            self.rmodelComplete = pin.buildModelFromUrdf(self.URDF_path)
 
         self._refineModel(self.rmodelComplete, SRDF)
         self._addLimits()

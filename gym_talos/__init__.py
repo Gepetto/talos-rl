@@ -1,6 +1,6 @@
 from gym.envs.registration import register
 
 register(
-    id="talos-base-v0",
-    entry_point="gym_talos.envs:EnvTalosBase",
+    id="talos-deburring-v0",
+    entry_point="gym_talos.envs:EnvTalosDeburring",
 )

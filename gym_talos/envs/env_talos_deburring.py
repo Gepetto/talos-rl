@@ -1,57 +1,36 @@
 import gym
 import numpy as np
-import pinocchio as pin
 
 from ..utils.modelLoader import TalosDesigner
 
 from gym_talos.simulator.bullet_Talos import TalosDeburringSimulator
 
 
-class EnvTalosBase(gym.Env):
+class EnvTalosDeburring(gym.Env):
     def __init__(self, params_designer, params_env, GUI=False) -> None:
-        # Parameters
         self._init_parameters(params_env)
 
-        # Robot model loader
+        # Robot Designer
         self.pinWrapper = TalosDesigner(
             URDF=params_designer["URDF"],
             SRDF=params_designer["SRDF"],
-            toolPosition=params_designer["controlledJoints"],
-            controlledJoints=params_designer["toolPosition"],
+            toolPosition=params_designer["toolPosition"],
+            controlledJoints=params_designer["controlledJoints"],
         )
 
         self.rmodel = self.pinWrapper.rmodel
 
         # Simulator
         self.simulator = TalosDeburringSimulator(
-            URDF=params_designer["URDF"],
+            URDF=self.pinWrapper.URDF_path,
             rmodelComplete=self.pinWrapper.rmodelComplete,
             controlledJointsIDs=self.pinWrapper.controlledJointsID,
             enableGUI=GUI,
             dt=1e-4,
         )
 
-        # Environment variables
-        self.timer = 0
-        if self.normalizeObs:
-            self._init_obsNormalizer()
-        self.desired_state = self.pinWrapper.get_x0()
-
-        action_dim = len(params_designer["controlled_joints_names"]) - 1
-        self.action_space = gym.spaces.Box(
-            low=-1, high=1, shape=(action_dim,), dtype=np.float32
-        )
-
-        if self.normalizeObs:
-            observation_dim = self.desired_state.size
-            self.observation_space = gym.spaces.Box(
-                low=-1, high=1, shape=(observation_dim,), dtype=np.float64
-            )
-        else:
-            observation_dim = self.desired_state.size
-            self.observation_space = gym.spaces.Box(
-                low=-5, high=5, shape=(observation_dim,), dtype=np.float64
-            )
+        action_dimension = len(params_designer["controlledJoints"]) - 1
+        self._init_env_variables(action_dimension)
 
     def _init_parameters(self, params_env):
         self.numSimulationSteps = params_env["numSimulationSteps"]
@@ -70,6 +49,28 @@ class EnvTalosBase(gym.Env):
         self.weight_posture = params_env["weightPosture"]
         self.weight_command = params_env["weightCommand"]
         self.weight_alive = params_env["weightAlive"]
+
+    def _init_env_variables(self, action_dimension):
+        self.timer = 0
+        if self.normalizeObs:
+            self._init_obsNormalizer()
+        self.desired_state = self.pinWrapper.get_x0()
+
+        action_dim = action_dimension
+        self.action_space = gym.spaces.Box(
+            low=-1, high=1, shape=(action_dim,), dtype=np.float32
+        )
+
+        if self.normalizeObs:
+            observation_dim = self.desired_state.size
+            self.observation_space = gym.spaces.Box(
+                low=-1, high=1, shape=(observation_dim,), dtype=np.float64
+            )
+        else:
+            observation_dim = self.desired_state.size
+            self.observation_space = gym.spaces.Box(
+                low=-5, high=5, shape=(observation_dim,), dtype=np.float64
+            )
 
     def reset(self, *, seed=None, options=None):
         self.timer = 0
@@ -116,11 +117,7 @@ class EnvTalosBase(gym.Env):
 
     def _checkTermination(self, x_measured):
         stop_time = self.timer > (self.maxTime - 1)
-        if self.minHeight > 0:
-            stop_height = x_measured[2] < self.minHeight
-        else:
-            stop_height = False
-        return stop_time or stop_height
+        return stop_time
 
     def _checkTruncation(self):
         raise NotImplementedError
