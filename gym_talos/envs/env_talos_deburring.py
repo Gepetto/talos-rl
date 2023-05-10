@@ -29,8 +29,9 @@ class EnvTalosDeburring(gym.Env):
             dt=1e-4,
         )
 
-        action_dimension = len(params_designer["controlledJoints"]) - 1
-        self._init_env_variables(action_dimension)
+        action_dimension = self.rmodel.nq
+        observation_dimension = len(self.simulator.getRobotState())
+        self._init_env_variables(action_dimension, observation_dimension)
 
     def _init_parameters(self, params_env):
         self.numSimulationSteps = params_env["numSimulationSteps"]
@@ -50,24 +51,24 @@ class EnvTalosDeburring(gym.Env):
         self.weight_command = params_env["weightCommand"]
         self.weight_alive = params_env["weightAlive"]
 
-    def _init_env_variables(self, action_dimension):
+    def _init_env_variables(self, action_dimension, observation_dimension):
         self.timer = 0
         if self.normalizeObs:
             self._init_obsNormalizer()
-        self.desired_state = self.pinWrapper.get_x0()
 
         action_dim = action_dimension
         self.action_space = gym.spaces.Box(
             low=-1, high=1, shape=(action_dim,), dtype=np.float32
         )
 
+        observation_dim = observation_dimension
         if self.normalizeObs:
-            observation_dim = self.desired_state.size
+            observation_dim = len(self.simulator.getRobotState())
             self.observation_space = gym.spaces.Box(
                 low=-1, high=1, shape=(observation_dim,), dtype=np.float64
             )
         else:
-            observation_dim = self.desired_state.size
+            observation_dim = len(self.simulator.getRobotState())
             self.observation_space = gym.spaces.Box(
                 low=-5, high=5, shape=(observation_dim,), dtype=np.float64
             )
@@ -108,7 +109,7 @@ class EnvTalosDeburring(gym.Env):
 
     def _getReward(self, action, observation):
         # target distance
-        reward_toolPosition = np.linalg.norm(
+        reward_toolPosition = -np.linalg.norm(
             self.pinWrapper.oMtool.translation - self.targetPos
         )
 
@@ -128,25 +129,21 @@ class EnvTalosDeburring(gym.Env):
     def _init_obsNormalizer(self):
         self.lowerObsLim = np.concatenate(
             (
-                self.pinWrapper.get_rmodel().lowerPositionLimit,
-                -self.pinWrapper.get_rmodel().velocityLimit,
+                self.rmodel.lowerPositionLimit,
+                -self.rmodel.velocityLimit,
             ),
         )
         self.lowerObsLim[:7] = -5
-        self.lowerObsLim[
-            self.pinWrapper.get_rmodel().nq : self.pinWrapper.get_rmodel().nq + 6
-        ] = -5
+        self.lowerObsLim[self.rmodel.nq : self.rmodel.nq + 6] = -5
 
         self.upperObsLim = np.concatenate(
             (
-                self.pinWrapper.get_rmodel().upperPositionLimit,
-                self.pinWrapper.get_rmodel().velocityLimit,
+                self.rmodel.upperPositionLimit,
+                self.rmodel.velocityLimit,
             ),
         )
         self.upperObsLim[:7] = 5
-        self.upperObsLim[
-            self.pinWrapper.get_rmodel().nq : self.pinWrapper.get_rmodel().nq + 6
-        ] = 5
+        self.upperObsLim[self.rmodel.nq : self.rmodel.nq + 6] = 5
 
         self.avgObs = (self.upperObsLim + self.lowerObsLim) / 2
         self.diffObs = self.upperObsLim - self.lowerObsLim

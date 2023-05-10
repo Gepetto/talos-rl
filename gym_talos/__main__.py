@@ -3,6 +3,7 @@ import os
 
 from stable_baselines3 import SAC, PPO
 from stable_baselines3.common.vec_env import DummyVecEnv, VecNormalize
+from stable_baselines3.common.env_checker import check_env
 
 from .envs.env_talos_deburring import EnvTalosDeburring
 
@@ -32,6 +33,7 @@ envTrain = EnvTalosDeburring(params_designer, params_env, GUI=False)
 # # Automatically normalize the input features and reward
 # env = VecNormalize(env, norm_obs=True, norm_reward=False,
 #                    clip_obs=10.)
+check_env(envTrain)
 model = SAC("MlpPolicy", envTrain, verbose=1, tensorboard_log=tensorboard_log_dir)
 model.learn(
     total_timesteps=params_training["totalTimesteps"], tb_log_name=tensorboard_log_name

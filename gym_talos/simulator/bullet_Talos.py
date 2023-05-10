@@ -77,7 +77,7 @@ class TalosDeburringSimulator:
         # Joints controlled with crocoddyl
         self.bullet_controlledJoints = [
             self.names2bulletIndices[rmodelComplete.names[i]]
-            for i in controlledJointsIDs[1:]
+            for i in controlledJointsIDs
         ]
 
         self._setInitialConfig()
@@ -161,10 +161,10 @@ class TalosDeburringSimulator:
         v, w = p.getBaseVelocity(self.robotId)
 
         # Concatenate into a single x vector
-        x = np.concatenate([pos, quat, q, v, w, vq])
+        x = np.concatenate([q, vq])
 
         # Magic transformation of the basis translation, as classical in Bullet.
-        x[:3] -= self.localInertiaPos
+        # x[:3] -= self.localInertiaPos
 
         return x
 

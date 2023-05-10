@@ -21,7 +21,6 @@ class TalosDesigner:
         self._addTool(toolPosition)
 
         self._buildReducedModel(controlledJoints)
-        self._refineModel(self.rmodel, SRDF)
 
     def _refineModel(self, model, SRDF):
         """Load additional information from SRDF file
@@ -91,7 +90,7 @@ class TalosDesigner:
         self.rmodel = pin.buildReducedModel(
             self.rmodelComplete, lockedJointsID, self.q0Complete
         )
-        self.rdata = pin.createDatas(self.rmodel)
+        self.rdata = self.rmodel.createData()
 
         # Define a default State
         self.q0 = self.rmodel.referenceConfigurations["half_sitting"]
@@ -101,4 +100,4 @@ class TalosDesigner:
         pin.forwardKinematics(self.rmodel, self.rdata, x_measured[: self.rmodel.nq])
         pin.updateFramePlacements(self.rmodel, self.rdata)
 
-        self.oMtool = self.rdata[self.endEffectorId]
+        self.oMtool = self.rdata.oMf[self.endEffectorId]
