@@ -34,6 +34,10 @@ class EnvTalosDeburring(gym.Env):
         self._init_env_variables(action_dimension, observation_dimension)
 
     def _init_parameters(self, params_env):
+        """Initializes the parameters of the environment
+
+        :param params_env Dictionnary containing the parameters
+        """
         self.numSimulationSteps = params_env["numSimulationSteps"]
         self.normalizeObs = params_env["normalizeObs"]
         #   Action normalization parameter
@@ -47,11 +51,15 @@ class EnvTalosDeburring(gym.Env):
         self.targetPos = params_env["targetPosition"]
 
         #   Reward parameters
-        self.weight_posture = params_env["weightPosture"]
+        self.weight_target = params_env["weightTarget"]
         self.weight_command = params_env["weightCommand"]
-        self.weight_alive = params_env["weightAlive"]
 
     def _init_env_variables(self, action_dimension, observation_dimension):
+        """Initialize internal variables of the environment
+
+        :param action_dimension Dimension of the action space
+        :param observation_dimension Dimension of the observation space
+        """
         self.timer = 0
         if self.normalizeObs:
             self._init_obsNormalizer()
@@ -74,6 +82,10 @@ class EnvTalosDeburring(gym.Env):
             )
 
     def reset(self, *, seed=None, options=None):
+        """Reset the environment
+
+        Bring the robot back to its half-sitting position
+        """
         self.timer = 0
         self.simulator.reset()
 
@@ -83,6 +95,10 @@ class EnvTalosDeburring(gym.Env):
         return np.float32(x_measured)
 
     def step(self, action):
+        """Execute a step of the environment
+
+        :param action Normalized action vector
+        """
         self.timer += 1
 
         for _ in range(self.numSimulationSteps):
@@ -108,12 +124,17 @@ class EnvTalosDeburring(gym.Env):
             return x_measured
 
     def _getReward(self, action, observation):
+        # command regularization
+        reward_command = -np.linalg.norm(action)
         # target distance
         reward_toolPosition = -np.linalg.norm(
-            self.pinWrapper.oMtool.translation - self.targetPos
+            self.pinWrapper.get_end_effector_pos() - self.targetPos
         )
 
-        reward = reward_toolPosition
+        reward = (
+            self.weight_target * reward_toolPosition
+            + self.weight_command * reward_command
+        )
         return reward
 
     def _checkTermination(self, x_measured):
@@ -133,8 +154,6 @@ class EnvTalosDeburring(gym.Env):
                 -self.rmodel.velocityLimit,
             ),
         )
-        self.lowerObsLim[:7] = -5
-        self.lowerObsLim[self.rmodel.nq : self.rmodel.nq + 6] = -5
 
         self.upperObsLim = np.concatenate(
             (
@@ -142,8 +161,6 @@ class EnvTalosDeburring(gym.Env):
                 self.rmodel.velocityLimit,
             ),
         )
-        self.upperObsLim[:7] = 5
-        self.upperObsLim[self.rmodel.nq : self.rmodel.nq + 6] = 5
 
         self.avgObs = (self.upperObsLim + self.lowerObsLim) / 2
         self.diffObs = self.upperObsLim - self.lowerObsLim

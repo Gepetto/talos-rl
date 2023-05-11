@@ -15,6 +15,8 @@ class TalosDesigner:
         else:
             self.rmodelComplete = pin.buildModelFromUrdf(self.URDF_path)
 
+        self.rdataComplete = self.rmodelComplete.createData()
+
         self._refineModel(self.rmodelComplete, SRDF)
         self._addLimits()
 
@@ -101,3 +103,6 @@ class TalosDesigner:
         pin.updateFramePlacements(self.rmodel, self.rdata)
 
         self.oMtool = self.rdata.oMf[self.endEffectorId]
+
+    def get_end_effector_pos(self):
+        return self.oMtool.translation
