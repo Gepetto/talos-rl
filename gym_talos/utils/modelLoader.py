@@ -102,6 +102,9 @@ class TalosDesigner:
         pin.forwardKinematics(self.rmodel, self.rdata, x_measured[: self.rmodel.nq])
         pin.updateFramePlacements(self.rmodel, self.rdata)
 
+        self.CoM = pin.centerOfMass(
+            self.rmodel, self.rdata, x_measured[:self.rmodel.nq], False
+        )
         self.oMtool = self.rdata.oMf[self.endEffectorId]
 
     def get_end_effector_pos(self):

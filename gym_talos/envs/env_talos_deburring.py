@@ -51,8 +51,9 @@ class EnvTalosDeburring(gym.Env):
         self.targetPos = params_env["targetPosition"]
 
         #   Reward parameters
-        self.weight_target = params_env["weightTarget"]
-        self.weight_command = params_env["weightCommand"]
+        self.weight_target = params_env["w_target_pos"]
+        self.weight_command = params_env["w_control_reg"]
+        self.weight_truncation = params_env["w_penalization_truncation"]
 
     def _init_env_variables(self, action_dimension, observation_dimension):
         """Initialize internal variables of the environment
@@ -109,10 +110,14 @@ class EnvTalosDeburring(gym.Env):
         self.pinWrapper.update_reduced_model(x_measured)
 
         observation = self._getObservation(x_measured)
-        reward = self._getReward(action, observation)
         terminated = self._checkTermination(x_measured)
+        truncated = self._checkTruncation(x_measured)
+        reward = self._getReward(action, observation, terminated, truncated)
 
-        return observation, reward, terminated, {}
+        # No difference between termination and truncation in this version of Gym
+        done = terminated or truncated
+
+        return observation, reward, done, {}
 
     def close(self):
         self.simulator.end()
@@ -123,7 +128,12 @@ class EnvTalosDeburring(gym.Env):
         else:
             return x_measured
 
-    def _getReward(self, action, observation):
+    def _getReward(self, action, observation, terminated, truncated):
+        if truncated:
+            reward_alive = 0
+        else:
+            reward_alive = 1
+
         # command regularization
         reward_command = -np.linalg.norm(action)
         # target distance
@@ -134,6 +144,7 @@ class EnvTalosDeburring(gym.Env):
         reward = (
             self.weight_target * reward_toolPosition
             + self.weight_command * reward_command
+            + self.weight_truncation * reward_alive
         )
         return reward
 
@@ -141,8 +152,26 @@ class EnvTalosDeburring(gym.Env):
         stop_time = self.timer > (self.maxTime - 1)
         return stop_time
 
-    def _checkTruncation(self):
-        raise NotImplementedError
+    def _checkTruncation(self, x_measured):
+        # Loss of balance:
+        #   Rollout is stopped if position of CoM is under threshold
+        #   No check is carried out if threshold is set to 0
+        truncation_balance = (not (self.minHeight == 0)) and (
+            self.pinWrapper.CoM[2] < self.minHeight
+        )
+
+        # Limits infringement:
+        #   Rollout is stopped if configuration exceeds model limits
+        truncation_limits_position = (
+            x_measured[: self.rmodel.nq] > self.rmodel.upperPositionLimit
+        ).any() or (x_measured[: self.rmodel.nq] < self.rmodel.lowerPositionLimit).any()
+        truncation_limits_speed = (
+            x_measured[-self.rmodel.nv :] > self.rmodel.velocityLimit
+        ).any()
+        truncation_limits = truncation_limits_position or truncation_limits_speed
+
+        # Explicitely casting from numpy.bool_ to bool
+        return bool(truncation_balance or truncation_limits)
 
     def _scaleAction(self, action):
         return self.torqueScale * action

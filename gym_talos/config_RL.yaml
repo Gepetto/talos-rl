@@ -36,8 +36,9 @@ env:
   # Target
   targetPosition: [0.6,0.4,1.1]
   # Reward parameters
-  weightTarget: 1
-  weightCommand: 5
+  w_target_pos: 1
+  w_control_reg: 5
+  w_penalization_truncation: 10
 
 designer:
   URDF: "/talos_data/robots/talos_reduced.urdf"

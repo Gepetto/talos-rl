@@ -1,5 +1,7 @@
 import yaml
 import os
+import time
+
 
 from stable_baselines3 import SAC, PPO
 from stable_baselines3.common.env_util import SubprocVecEnv
@@ -10,8 +12,9 @@ from .envs.env_talos_deburring import EnvTalosDeburring
 ################
 #  PARAMETERS  #
 ################
-train = False
-display = True
+check = False
+train = True
+display = False
 
 tensorboard_log_dir = "./logs/"
 tensorboard_log_name = "test"
@@ -28,11 +31,16 @@ params_training = params["training"]
 ##############
 #  TRAINING  #
 ##############
+if check:
+    check_env(EnvTalosDeburring(params_designer, params_env, GUI=False))
+
 if train:
+    start = time.time()
     # envTrain = EnvTalosDeburring(params_designer, params_env, GUI=False)
-    envTrain = SubprocVecEnv(
-        6 * [lambda: EnvTalosDeburring(params_designer, params_env, GUI=False)]
-    )
+    envTrain = EnvTalosDeburring(params_designer, params_env, GUI=False)
+    # envTrain = SubprocVecEnv(
+    #     12 * [lambda: EnvTalosDeburring(params_designer, params_env, GUI=False)]
+    # )
     # env = DummyVecEnv([lambda: EnvTalosBase(targetPos, designer_conf)])
     # # Automatically normalize the input features and reward
     # env = VecNormalize(env, norm_obs=True, norm_reward=False,
@@ -40,10 +48,14 @@ if train:
     model = SAC("MlpPolicy", envTrain, verbose=1, tensorboard_log=tensorboard_log_dir)
 
     model.learn(
-        total_timesteps=params_training["totalTimesteps"], tb_log_name=tensorboard_log_name
+        total_timesteps=params_training["totalTimesteps"],
+        tb_log_name=tensorboard_log_name,
     )
 
     envTrain.close()
+
+    end = time.time()
+    print(end - start)
 
     model.save(tensorboard_log_dir + tensorboard_log_name)
 
