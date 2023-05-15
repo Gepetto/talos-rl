@@ -6,6 +6,7 @@ import time
 from stable_baselines3 import SAC, PPO
 from stable_baselines3.common.env_util import SubprocVecEnv
 from stable_baselines3.common.env_checker import check_env
+from stable_baselines3.common.monitor import Monitor
 
 from .envs.env_talos_deburring import EnvTalosDeburring
 
@@ -19,14 +20,18 @@ display = False
 tensorboard_log_dir = "./logs/"
 tensorboard_log_name = "test"
 
+config_filename = "/config_RL.yaml"
+
 # Parameters filename
-dir_path = os.path.dirname(os.path.realpath(__file__))
-filename = "/config_RL.yaml"
-with open(dir_path + filename, "r") as paramFile:
+config_dir_path = os.path.dirname(os.path.realpath(__file__))
+
+with open(config_dir_path + config_filename, "r") as paramFile:
     params = yaml.safe_load(paramFile)
 params_designer = params["designer"]
 params_env = params["env"]
 params_training = params["training"]
+
+number_environments = params_training["numEnv"]
 
 ##############
 #  TRAINING  #
@@ -35,13 +40,17 @@ if check:
     check_env(EnvTalosDeburring(params_designer, params_env, GUI=False))
 
 if train:
-    start = time.time()
-    # envTrain = EnvTalosDeburring(params_designer, params_env, GUI=False)
-    envTrain = EnvTalosDeburring(params_designer, params_env, GUI=False)
-    # envTrain = SubprocVecEnv(
-    #     12 * [lambda: EnvTalosDeburring(params_designer, params_env, GUI=False)]
-    # )
-    # env = DummyVecEnv([lambda: EnvTalosBase(targetPos, designer_conf)])
+    if number_environments == 1:
+        envTrain = EnvTalosDeburring(params_designer, params_env, GUI=False)
+    else:
+        envTrain = SubprocVecEnv(
+            number_environments
+            * [
+                lambda: Monitor(
+                    EnvTalosDeburring(params_designer, params_env, GUI=False)
+                )
+            ]
+        )
     # # Automatically normalize the input features and reward
     # env = VecNormalize(env, norm_obs=True, norm_reward=False,
     #                    clip_obs=10.)
@@ -53,9 +62,6 @@ if train:
     )
 
     envTrain.close()
-
-    end = time.time()
-    print(end - start)
 
     model.save(tensorboard_log_dir + tensorboard_log_name)
 

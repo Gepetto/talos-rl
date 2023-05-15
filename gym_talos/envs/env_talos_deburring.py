@@ -26,7 +26,7 @@ class EnvTalosDeburring(gym.Env):
             rmodelComplete=self.pinWrapper.rmodelComplete,
             controlledJointsIDs=self.pinWrapper.controlledJointsID,
             enableGUI=GUI,
-            dt=1e-4,
+            dt=1e-3,
         )
 
         action_dimension = self.rmodel.nq
