@@ -8,6 +8,17 @@ from gym_talos.simulator.bullet_Talos import TalosDeburringSimulator
 
 class EnvTalosDeburring(gym.Env):
     def __init__(self, params_designer, params_env, GUI=False) -> None:
+        """Defines the EnvTalosDeburring class
+
+        Defines an interface a robot designer to handle interactions with pinocchio,
+        an interface to the simulator that will be used
+        as well as usefull internal variables.
+
+        Args:
+            params_designer: kwargs for the robot designer
+            params_env: kwargs for the environment
+            GUI: set to true to activate display. Defaults to False.
+        """
         self._init_parameters(params_env)
 
         # Robot Designer
@@ -34,9 +45,10 @@ class EnvTalosDeburring(gym.Env):
         self._init_env_variables(action_dimension, observation_dimension)
 
     def _init_parameters(self, params_env):
-        """Initializes the parameters of the environment
+        """Load environment parameters from provided dictionnary
 
-        :param params_env Dictionnary containing the parameters
+        Args:
+            params_env: kwargs for the environment
         """
         self.numSimulationSteps = params_env["numSimulationSteps"]
         self.normalizeObs = params_env["normalizeObs"]
@@ -58,8 +70,9 @@ class EnvTalosDeburring(gym.Env):
     def _init_env_variables(self, action_dimension, observation_dimension):
         """Initialize internal variables of the environment
 
-        :param action_dimension Dimension of the action space
-        :param observation_dimension Dimension of the observation space
+        Args:
+            action_dimension: Dimension of the action space
+            observation_dimension: Dimension of the observation space
         """
         self.timer = 0
         if self.normalizeObs:
@@ -82,10 +95,24 @@ class EnvTalosDeburring(gym.Env):
                 low=-5, high=5, shape=(observation_dim,), dtype=np.float64
             )
 
+    def close(self):
+        """Properly shuts down the environment.
+
+        Closes the simmulator windows.
+        """
+        self.simulator.end()
+
     def reset(self, *, seed=None, options=None):
         """Reset the environment
 
-        Bring the robot back to its half-sitting position
+        Brings the robot back to its half-sitting position
+
+        Args:
+            seed: seed that is used to initialize the environment's PRNG. Defaults to None.
+            options: Additional information that can be specified to reset the environment. Defaults to None.
+
+        Returns:
+            Observation of the initial state.
         """
         self.timer = 0
         self.simulator.reset()
@@ -98,7 +125,15 @@ class EnvTalosDeburring(gym.Env):
     def step(self, action):
         """Execute a step of the environment
 
-        :param action Normalized action vector
+        One step of the environment is numSimulationSteps of the simulator with the same command.
+        The model of the robot is updated using the observation taken from the environment.
+        The termination and condition are checked and the reward is computed.
+
+        Args:
+            action: Normalized action vector
+
+        Returns:
+            _type_: _description_
         """
         self.timer += 1
 
@@ -119,16 +154,39 @@ class EnvTalosDeburring(gym.Env):
 
         return observation, reward, done, {}
 
-    def close(self):
-        self.simulator.end()
-
     def _getObservation(self, x_measured):
+        """Formats observations
+
+        Normalizes the observation obtained from the simulator if nomalizeObs = True
+
+        Args:
+            x_measured: observation array obtained from the simulator
+
+        Returns:
+            Fromated observations
+        """
         if self.normalizeObs:
             return self._obsNormalizer(x_measured)
         else:
             return x_measured
 
     def _getReward(self, action, observation, terminated, truncated):
+        """Compute step reward
+
+        The reward is composed of:
+            - A bonus when the environment is still alive (no constraint has been infriged)
+            - A cost proportional to the norm of the action
+            - A cost proportional to the distance of the end-effector to the target
+
+        Args:
+            action: Normalized action vector
+            observation: Formatted observations
+            terminated: termination bool
+            truncated: truncation bool
+
+        Returns:
+            Scalar reward
+        """
         if truncated:
             reward_alive = 0
         else:
@@ -149,10 +207,35 @@ class EnvTalosDeburring(gym.Env):
         return reward
 
     def _checkTermination(self, x_measured):
+        """Check the termination conditions.
+
+        Environment is terminated when the task has been successfully carried out.
+        In our case it means that maxTime has been reached.
+
+        Args:
+            x_measured: observation array obtained from the simulator
+
+        Returns:
+            True if the environment has been terminated, False otherwise
+        """
         stop_time = self.timer > (self.maxTime - 1)
-        return stop_time
+        termination = stop_time
+        return termination
 
     def _checkTruncation(self, x_measured):
+        """Checks the truncation conditions.
+
+        Environment is truncated when a constraint is infriged.
+        There are two possible reasons for truncations:
+         - Loss of balance of the robot
+         - Infrigement of the kinematic constraints of the robot
+
+        Args:
+            x_measured: observation array obtained from the simulator
+
+        Returns:
+            True if the environment has been truncated, False otherwise.
+        """
         # Loss of balance:
         #   Rollout is stopped if position of CoM is under threshold
         #   No check is carried out if threshold is set to 0
@@ -171,7 +254,8 @@ class EnvTalosDeburring(gym.Env):
         truncation_limits = truncation_limits_position or truncation_limits_speed
 
         # Explicitely casting from numpy.bool_ to bool
-        return bool(truncation_balance or truncation_limits)
+        truncation = bool(truncation_balance or truncation_limits)
+        return truncation
 
     def _scaleAction(self, action):
         return self.torqueScale * action
