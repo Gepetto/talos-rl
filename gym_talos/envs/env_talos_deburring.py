@@ -120,7 +120,9 @@ class EnvTalosDeburring(gym.Env):
         x_measured = self.simulator.getRobotState()
         self.pinWrapper.update_reduced_model(x_measured)
 
-        return np.float32(x_measured)
+        observation = self._getObservation(x_measured)
+
+        return observation
 
     def step(self, action):
         """Execute a step of the environment
@@ -133,12 +135,15 @@ class EnvTalosDeburring(gym.Env):
             action: Normalized action vector
 
         Returns:
-            _type_: _description_
+            Formatted observations
+            Reward
+            Boolean indicating this rollout is done
         """
         self.timer += 1
+        torques = self._scaleAction(action)
 
         for _ in range(self.numSimulationSteps):
-            self.simulator.step(self._scaleAction(action))
+            self.simulator.step(torques)
 
         x_measured = self.simulator.getRobotState()
 
@@ -147,10 +152,16 @@ class EnvTalosDeburring(gym.Env):
         observation = self._getObservation(x_measured)
         terminated = self._checkTermination(x_measured)
         truncated = self._checkTruncation(x_measured)
-        reward = self._getReward(action, observation, terminated, truncated)
+        reward = self._getReward(torques, x_measured, terminated, truncated)
 
         # No difference between termination and truncation in this version of Gym
         done = terminated or truncated
+
+        print("Action: " + str(action))
+        print("Torques: " + str(torques))
+        print(self.observation_space)
+        print("Measured State: " + str(x_measured))
+        print("Observation: " + str(observation))
 
         return observation, reward, done, {}
 
@@ -166,21 +177,22 @@ class EnvTalosDeburring(gym.Env):
             Fromated observations
         """
         if self.normalizeObs:
-            return self._obsNormalizer(x_measured)
+            observation = self._obsNormalizer(x_measured)
         else:
-            return x_measured
+            observation = x_measured
+        return np.float32(observation)
 
-    def _getReward(self, action, observation, terminated, truncated):
+    def _getReward(self, torques, x_measured, terminated, truncated):
         """Compute step reward
 
         The reward is composed of:
             - A bonus when the environment is still alive (no constraint has been infriged)
-            - A cost proportional to the norm of the action
+            - A cost proportional to the norm of the torques
             - A cost proportional to the distance of the end-effector to the target
 
         Args:
-            action: Normalized action vector
-            observation: Formatted observations
+            torques: torque vector
+            x_measured: observation array obtained from the simulator
             terminated: termination bool
             truncated: truncation bool
 
@@ -193,7 +205,7 @@ class EnvTalosDeburring(gym.Env):
             reward_alive = 1
 
         # command regularization
-        reward_command = -np.linalg.norm(action)
+        reward_command = -np.linalg.norm(torques)
         # target distance
         reward_toolPosition = -np.linalg.norm(
             self.pinWrapper.get_end_effector_pos() - self.targetPos
@@ -258,9 +270,19 @@ class EnvTalosDeburring(gym.Env):
         return truncation
 
     def _scaleAction(self, action):
-        return self.torqueScale * action
+        """Scales normalized actions to obtain robot torques
+
+        Args:
+            action: normalized action array
+
+        Returns:
+            torque array
+        """
+        torques = self.torqueScale * action
+        return torques
 
     def _init_obsNormalizer(self):
+        """Initializes the observation normalizer using robot model limits"""
         self.lowerObsLim = np.concatenate(
             (
                 self.rmodel.lowerPositionLimit,
@@ -279,4 +301,13 @@ class EnvTalosDeburring(gym.Env):
         self.diffObs = self.upperObsLim - self.lowerObsLim
 
     def _obsNormalizer(self, x_measured):
-        return (x_measured - self.avgObs) / self.diffObs
+        """Normalizes the observation taken from the simulator
+
+        Args:
+            x_measured: observation array obtained from the simulator
+
+        Returns:
+            normalized observation
+        """
+        observation = (x_measured - self.avgObs) / self.diffObs
+        return observation
