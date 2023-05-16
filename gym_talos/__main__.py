@@ -49,9 +49,7 @@ if train:
                 )
             ]
         )
-    # # Automatically normalize the input features and reward
-    # env = VecNormalize(env, norm_obs=True, norm_reward=False,
-    #                    clip_obs=10.)
+
     model = SAC("MlpPolicy", envTrain, verbose=1, tensorboard_log=tensorboard_log_dir)
 
     model.learn(

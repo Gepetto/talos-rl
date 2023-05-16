@@ -37,7 +37,7 @@ class EnvTalosDeburring(gym.Env):
             rmodelComplete=self.pinWrapper.rmodelComplete,
             controlledJointsIDs=self.pinWrapper.controlledJointsID,
             enableGUI=GUI,
-            dt=1e-3,
+            dt=self.timeStepSimulation,
         )
 
         action_dimension = self.rmodel.nq
@@ -50,10 +50,11 @@ class EnvTalosDeburring(gym.Env):
         Args:
             params_env: kwargs for the environment
         """
+        # Simumlation timings
+        self.timeStepSimulation = float(params_env["timeStepSimulation"])
         self.numSimulationSteps = params_env["numSimulationSteps"]
+
         self.normalizeObs = params_env["normalizeObs"]
-        #   Action normalization parameter
-        self.torqueScale = np.array(params_env["torqueScale"])
 
         #   Stop conditions
         self.maxTime = params_env["maxTime"]
@@ -75,8 +76,15 @@ class EnvTalosDeburring(gym.Env):
             observation_dimension: Dimension of the observation space
         """
         self.timer = 0
+
+        self.maxStep = int(
+            self.maxTime / (self.timeStepSimulation * self.numSimulationSteps)
+        )
+
         if self.normalizeObs:
             self._init_obsNormalizer()
+
+        self.torqueScale = np.array(self.rmodel.effortLimit)
 
         action_dim = action_dimension
         self.action_space = gym.spaces.Box(
@@ -157,12 +165,6 @@ class EnvTalosDeburring(gym.Env):
         # No difference between termination and truncation in this version of Gym
         done = terminated or truncated
 
-        print("Action: " + str(action))
-        print("Torques: " + str(torques))
-        print(self.observation_space)
-        print("Measured State: " + str(x_measured))
-        print("Observation: " + str(observation))
-
         return observation, reward, done, {}
 
     def _getObservation(self, x_measured):
@@ -230,7 +232,7 @@ class EnvTalosDeburring(gym.Env):
         Returns:
             True if the environment has been terminated, False otherwise
         """
-        stop_time = self.timer > (self.maxTime - 1)
+        stop_time = self.timer > (self.maxStep - 1)
         termination = stop_time
         return termination
 
@@ -239,8 +241,12 @@ class EnvTalosDeburring(gym.Env):
 
         Environment is truncated when a constraint is infriged.
         There are two possible reasons for truncations:
-         - Loss of balance of the robot
+         - Loss of balance of the robot:
+            Rollout is stopped if position of CoM is under threshold
+            No check is carried out if threshold is set to 0
          - Infrigement of the kinematic constraints of the robot
+            Rollout is stopped if configuration exceeds model limits
+
 
         Args:
             x_measured: observation array obtained from the simulator
@@ -248,15 +254,12 @@ class EnvTalosDeburring(gym.Env):
         Returns:
             True if the environment has been truncated, False otherwise.
         """
-        # Loss of balance:
-        #   Rollout is stopped if position of CoM is under threshold
-        #   No check is carried out if threshold is set to 0
+        # Balance
         truncation_balance = (not (self.minHeight == 0)) and (
             self.pinWrapper.CoM[2] < self.minHeight
         )
 
-        # Limits infringement:
-        #   Rollout is stopped if configuration exceeds model limits
+        # Limits
         truncation_limits_position = (
             x_measured[: self.rmodel.nq] > self.rmodel.upperPositionLimit
         ).any() or (x_measured[: self.rmodel.nq] < self.rmodel.lowerPositionLimit).any()
