@@ -106,7 +106,7 @@ class EnvTalosDeburring(gym.Env):
     def close(self):
         """Properly shuts down the environment.
 
-        Closes the simmulator windows.
+        Closes the simulator windows.
         """
         self.simulator.end()
 
