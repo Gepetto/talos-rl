@@ -1,0 +1,18 @@
+Bootstrap: docker
+From: mambaorg/micromamba
+
+%files
+    requirements.txt
+    env.yaml
+    gym_talos
+
+%post
+    micromamba install -y -n base -c conda-forge -f env.yaml && \
+    micromamba clean --all --yes
+
+%appfiles test
+    gym_talos
+
+%apprun test
+    exec /bin/micromamba activate
+    exec python -m gym_talos

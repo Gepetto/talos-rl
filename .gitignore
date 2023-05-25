@@ -3,3 +3,4 @@ pyRL
 envRL
 logs
 __pycache__
+*.sif*

@@ -1,0 +1,4 @@
+stable-baselines3==1.5.0
+pybullet
+pyyaml
+tensorboard

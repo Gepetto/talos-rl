@@ -1,0 +1,26 @@
+Bootstrap: docker
+From: ubuntu:20.04
+
+%files
+    robotpkg.key
+    requirements.txt
+    gym_talos
+
+%post
+    apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y gnupg2
+    apt-key add robotpkg.key
+    echo "deb [arch=amd64] http://robotpkg.openrobots.org/packages/debian/pub focal robotpkg" > /etc/apt/sources.list.d/robotpkg.list
+    apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y  \
+        robotpkg-py38-example-robot-data \
+        python3-pip
+
+    pip install --upgrade pip
+    pip install --no-cache-dir -r requirements.txt
+
+    echo "/opt/openrobots/lib/python3.8/site-packages" > /usr/lib/python3/dist-packages/robotpkg.pth
+
+%appfiles test
+    gym_talos
+
+%apprun test
+    exec python3 -m gym_talos
