@@ -1,7 +1,7 @@
 training:
   name: "test"
   environment_quantity: 1 # Number of environments used to collect data
-  total_timesteps: 500 # Total number of training timesteps
+  total_timesteps: 5000 # Total number of training timesteps
   verbose: False
 
 environment:

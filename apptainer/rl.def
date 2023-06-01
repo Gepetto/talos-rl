@@ -23,4 +23,4 @@ From: ubuntu:20.04
     gym_talos
 
 %apprun train
-    exec python3 -m gym_talos
+    exec python3 -m gym_talos -config ./config/config_RL.yaml
