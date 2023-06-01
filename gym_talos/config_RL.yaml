@@ -1,4 +1,24 @@
-designer:
+training:
+  name: "test"
+  environment_quantity: 1 # Number of environments used to collect data
+  total_timesteps: 5000 # Total number of training timesteps
+  verbose: True
+
+environment:
+  numSimulationSteps: 10
+  timeStepSimulation: 1e-3
+  normalizeObs: True
+  # Stop conditions
+  maxTime: 10 # Maximum epoch time in seconds
+  minHeight: 0.8 # if 0 no check is performed on the height of the robot
+  # Target
+  targetPosition: [0.6,0.4,1.1]
+  # Reward parameters
+  w_target_pos: 10
+  w_control_reg: 0.5
+  w_penalization_truncation: 5
+
+robot_designer:
   URDF: "/talos_data/robots/talos_reduced.urdf"
   SRDF: "/talos_data/srdf/talos.srdf"
   controlledJoints:
@@ -31,23 +51,3 @@ designer:
       # arm_right_4_joint,
     ]
   toolPosition: [0, -0.02, -0.0825]
-
-env:
-  numSimulationSteps: 10
-  timeStepSimulation: 1e-3
-  normalizeObs: True
-  # Stop conditions
-  maxTime: 10 # Maximum epoch time in seconds
-  minHeight: 0.8 # if 0 no check is performed on the height of the robot
-  # Target
-  targetPosition: [0.6,0.4,1.1]
-  # Reward parameters
-  w_target_pos: 10
-  w_control_reg: 0.5
-  w_penalization_truncation: 5
-
-SAC:
-
-training:
-  numEnv: 1
-  totalTimesteps: 5000

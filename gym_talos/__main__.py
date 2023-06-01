@@ -1,6 +1,7 @@
 import yaml
 import os
 import torch
+import argparse
 
 from stable_baselines3 import SAC
 from stable_baselines3.common.env_util import SubprocVecEnv
@@ -11,26 +12,52 @@ from .envs.env_talos_deburring import EnvTalosDeburring
 ################
 #  PARAMETERS  #
 ################
-torch.set_num_threads(1)
+# Parse command line arguments
+parser = argparse.ArgumentParser()
+parser.add_argument(
+    "-id",
+    "--identication",
+    default=None,
+    help="Identification number for the training (usefull when launching several trainings in parallel)",
+    type=int,
+)
+parser.add_argument(
+    "-config",
+    "--configurationFile",
+    required=True,
+    help="Path to file containg the configuration of the training",
+)
+
+args = parser.parse_args()
+
+# Parsing configuration file
+#   Configuration file name is provided in command line
+config_filename = str(args.configurationFile)
+
+with open(config_filename, "r") as config_file:
+    params = yaml.safe_load(config_file)
+
+params_designer = params["robot_designer"]
+params_env = params["environment"]
+params_training = params["training"]
+
 
 train = True
 display = False
 
 tensorboard_log_dir = "./logs/"
-tensorboard_log_name = "test"
 
-config_filename = "/config_RL.yaml"
+training_id = args.identication
+if training_id:
+    training_name = params_training["name"] + "_" + str(training_id)
+else:
+    training_name = params_training["name"]
 
-# Parameters filename
-config_dir_path = os.path.dirname(os.path.realpath(__file__))
+number_environments = params_training["environment_quantity"]
+total_timesteps = params_training["total_timesteps"]
+verbose = params_training["verbose"]
 
-with open(config_dir_path + config_filename, "r") as paramFile:
-    params = yaml.safe_load(paramFile)
-params_designer = params["designer"]
-params_env = params["env"]
-params_training = params["training"]
-
-number_environments = params_training["numEnv"]
+torch.set_num_threads(1)
 
 ##############
 #  TRAINING  #
@@ -48,19 +75,21 @@ if train:
             ]
         )
 
-    model = SAC("MlpPolicy", envTrain, verbose=0, tensorboard_log=tensorboard_log_dir)
+    model = SAC(
+        "MlpPolicy", envTrain, verbose=verbose, tensorboard_log=tensorboard_log_dir
+    )
 
     model.learn(
-        total_timesteps=params_training["totalTimesteps"],
-        tb_log_name=tensorboard_log_name,
+        total_timesteps=total_timesteps,
+        tb_log_name=training_name,
     )
 
     envTrain.close()
 
-    model.save(tensorboard_log_dir + tensorboard_log_name)
+    model.save(tensorboard_log_dir + training_name)
 
 if display:
-    model = SAC.load(tensorboard_log_dir + tensorboard_log_name)
+    model = SAC.load(tensorboard_log_dir + training_name)
 
     envDisplay = EnvTalosDeburring(params_designer, params_env, GUI=True)
     envDisplay.maxTime = 1000
