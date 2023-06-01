@@ -1,9 +1,12 @@
 #!/bin/bash
 
+#SBATCH --job-name=talosRL
 #SBATCH --ntasks=1
 #SBATCH --array=0-10
-#SBATCH --mail-type=ALL
-#SBATCH --output=output-%A-%a-%N.log
-#SBATCH --error=output-%A-%a-%N.err
+#SBATCH --time=30:00                    ### Maximum Requested time
+#SBATCH --begin=now                     ### Beginning ASAP
+#SBATCH --mail-type=ALL                 ### Send email for (BEGIN, END, FAIL, INVALID_DEPEND, REQUEUE, STAGE_OUT)
+#SBATCH --output=output-%A-%a-%N.log    ### Standard outpout STDOUT
+#SBATCH --error=output-%A-%a-%N.err     ### Error outpour STDERR
 
-apptainer run --no-home --bind ./logs:/logs --app test rl.sif
+apptainer run --no-home --bind /pfcalcul/work/cperrot/logs:/logs --app train rl.sif
