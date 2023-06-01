@@ -1,9 +1,9 @@
 import yaml
 import os
+import torch
 
 from stable_baselines3 import SAC
 from stable_baselines3.common.env_util import SubprocVecEnv
-from stable_baselines3.common.env_checker import check_env
 from stable_baselines3.common.monitor import Monitor
 
 from .envs.env_talos_deburring import EnvTalosDeburring
@@ -11,7 +11,8 @@ from .envs.env_talos_deburring import EnvTalosDeburring
 ################
 #  PARAMETERS  #
 ################
-check = False
+torch.set_num_threads(1)
+
 train = True
 display = False
 
@@ -34,9 +35,6 @@ number_environments = params_training["numEnv"]
 ##############
 #  TRAINING  #
 ##############
-if check:
-    check_env(EnvTalosDeburring(params_designer, params_env, GUI=False))
-
 if train:
     if number_environments == 1:
         envTrain = EnvTalosDeburring(params_designer, params_env, GUI=False)
@@ -50,7 +48,7 @@ if train:
             ]
         )
 
-    model = SAC("MlpPolicy", envTrain, verbose=1, tensorboard_log=tensorboard_log_dir)
+    model = SAC("MlpPolicy", envTrain, verbose=0, tensorboard_log=tensorboard_log_dir)
 
     model.learn(
         total_timesteps=params_training["totalTimesteps"],
@@ -71,6 +69,6 @@ if display:
         action, _ = model.predict(obs, deterministic=True)
         _, _, done, _ = envDisplay.step(action)
         if done:
-            input("Press to restart")
+            input("Press to any key restart")
             envDisplay.reset()
     envDisplay.close()

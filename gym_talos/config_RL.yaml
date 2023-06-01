@@ -33,7 +33,7 @@ designer:
   toolPosition: [0, -0.02, -0.0825]
 
 env:
-  numSimulationSteps: 1
+  numSimulationSteps: 10
   timeStepSimulation: 1e-3
   normalizeObs: True
   # Stop conditions
@@ -42,12 +42,12 @@ env:
   # Target
   targetPosition: [0.6,0.4,1.1]
   # Reward parameters
-  w_target_pos: 1
-  w_control_reg: 1
-  w_penalization_truncation: 10
+  w_target_pos: 10
+  w_control_reg: 0.5
+  w_penalization_truncation: 5
 
 SAC:
 
 training:
-  numEnv: 6
-  totalTimesteps: 100000
+  numEnv: 1
+  totalTimesteps: 5000

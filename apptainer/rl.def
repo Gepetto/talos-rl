@@ -19,8 +19,8 @@ From: ubuntu:20.04
 
     echo "/opt/openrobots/lib/python3.8/site-packages" > /usr/lib/python3/dist-packages/robotpkg.pth
 
-%appfiles test
+%appfiles train
     gym_talos
 
-%apprun test
+%apprun train
     exec python3 -m gym_talos
