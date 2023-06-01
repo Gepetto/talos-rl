@@ -1,7 +1,8 @@
-import yaml
-import os
-import torch
 import argparse
+import datetime
+import shutil
+import torch
+import yaml
 
 from stable_baselines3 import SAC
 from stable_baselines3.common.env_util import SubprocVecEnv
@@ -29,11 +30,10 @@ parser.add_argument(
 )
 
 args = parser.parse_args()
+config_filename = str(args.configurationFile)
+training_id = args.identication
 
 # Parsing configuration file
-#   Configuration file name is provided in command line
-config_filename = str(args.configurationFile)
-
 with open(config_filename, "r") as config_file:
     params = yaml.safe_load(config_file)
 
@@ -41,17 +41,17 @@ params_designer = params["robot_designer"]
 params_env = params["environment"]
 params_training = params["training"]
 
-
-train = True
-display = False
-
-tensorboard_log_dir = "./logs/"
-
-training_id = args.identication
+# Setting names and log locations
+now = datetime.datetime.now()
+current_date = str(now.strftime("%Y-%m-%d"))
 if training_id:
-    training_name = params_training["name"] + "_" + str(training_id)
+    training_name = (
+        current_date + "_" + params_training["name"] + "_" + str(training_id)
+    )
 else:
-    training_name = params_training["name"]
+    training_name = current_date + "_" + params_training["name"]
+
+log_dir = "./logs/"
 
 number_environments = params_training["environment_quantity"]
 total_timesteps = params_training["total_timesteps"]
@@ -62,42 +62,32 @@ torch.set_num_threads(1)
 ##############
 #  TRAINING  #
 ##############
-if train:
-    if number_environments == 1:
-        envTrain = EnvTalosDeburring(params_designer, params_env, GUI=False)
-    else:
-        envTrain = SubprocVecEnv(
-            number_environments
-            * [
-                lambda: Monitor(
-                    EnvTalosDeburring(params_designer, params_env, GUI=False)
-                )
-            ]
-        )
-
-    model = SAC(
-        "MlpPolicy", envTrain, verbose=verbose, tensorboard_log=tensorboard_log_dir
+# Create environment
+if number_environments == 1:
+    env_training = EnvTalosDeburring(params_designer, params_env, GUI=False)
+else:
+    env_training = SubprocVecEnv(
+        number_environments
+        * [lambda: Monitor(EnvTalosDeburring(params_designer, params_env, GUI=False))]
     )
 
-    model.learn(
-        total_timesteps=total_timesteps,
-        tb_log_name=training_name,
-    )
+# Create Agent
+model = SAC(
+    "MlpPolicy",
+    env_training,
+    verbose=verbose,
+    tensorboard_log=log_dir,
+    device="cpu",
+)
 
-    envTrain.close()
+# Train Agent
+model.learn(
+    total_timesteps=total_timesteps,
+    tb_log_name=training_name,
+)
 
-    model.save(tensorboard_log_dir + training_name)
+env_training.close()
 
-if display:
-    model = SAC.load(tensorboard_log_dir + training_name)
-
-    envDisplay = EnvTalosDeburring(params_designer, params_env, GUI=True)
-    envDisplay.maxTime = 1000
-    obs = envDisplay.reset()
-    while True:
-        action, _ = model.predict(obs, deterministic=True)
-        _, _, done, _ = envDisplay.step(action)
-        if done:
-            input("Press to any key restart")
-            envDisplay.reset()
-    envDisplay.close()
+# Save agent and config file
+model.save(model.logger.dir + "/" + training_name)
+shutil.copy(config_filename, model.logger.dir + "/" + training_name + ".yaml")
