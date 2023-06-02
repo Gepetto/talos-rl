@@ -2,17 +2,15 @@ Bootstrap: docker
 From: mambaorg/micromamba
 
 %files
-    requirements.txt
-    env.yaml
+    apptainer/env.yaml
     gym_talos
 
 %post
-    micromamba install -y -n base -c conda-forge -f env.yaml && \
+    micromamba install -q -y -n base -c conda-forge -f apptainer/env.yaml && \
     micromamba clean --all --yes
 
 %appfiles test
     gym_talos
 
-%apprun test
-    exec /bin/micromamba activate
-    exec python -m gym_talos
+%apprun train
+    exec python3 -m gym_talos -config ./config/config_RL.yaml
