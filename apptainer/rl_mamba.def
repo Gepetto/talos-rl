@@ -4,13 +4,14 @@ From: mambaorg/micromamba
 %files
     apptainer/env.yaml
     gym_talos
+    config
 
 %post
     micromamba install -q -y -n base -c conda-forge -f apptainer/env.yaml && \
     micromamba clean --all --yes
 
-%appfiles test
-    gym_talos
+%environment
+    export PYTHONPATH=/
 
-%apprun train
-    exec python3 -m gym_talos -config ./config/config_RL.yaml
+%runscript
+    exec micromamba run -n base python -m gym_talos -config /config/config_RL.yaml
