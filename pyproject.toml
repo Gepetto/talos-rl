@@ -1,36 +1,31 @@
-[tool.poetry]
-name = "talos-rl"
-version = "0.1.0"
-description = "Tools to do Reinforcement Learning on Talos"
-authors = ["Côme Perrot <cperrot@laas.fr>"]
-license = "BSD-2-Clause"
-readme = "README.md"
-
-[tool.poetry.dependencies]
-python = "^3.8"
-example-robot-data = "^4.0.7"
-torch = "^2.0.1"
-tensorboard = "^2.13.0"
-PyYAML = "^6.0"
-stable-baselines3 = {version = "^2.0.0a10", allow-prereleases = true}
-pybullet = "^3.2.5"
-
-
 [build-system]
-requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
-
-
-[tool.ruff]
-extend-exclude = ["migrations"]
-extend-ignore = ["D203", "D213"]
-extend-select = ["A", "B", "C", "COM", "DJ", "EM", "EXE", "G", "N", "PTH", "RET", "RUF", "UP", "W", "YTT"]
-target-version = "py310"
-
-[tool.tomlsort]
-all = true
-
+requires = ["poetry-core"]
 
 [tool.isort]
 profile = "black"
 
+[tool.poetry]
+authors = ["Côme Perrot <cperrot@laas.fr>"]
+description = "Tools to do Reinforcement Learning on Talos"
+license = "BSD-2-Clause"
+name = "talos-rl"
+readme = "README.md"
+version = "0.1.0"
+
+[tool.poetry.dependencies]
+PyYAML = "^6.0"
+example-robot-data = "^4.0.7"
+pybullet = "^3.2.5"
+python = "^3.8"
+stable-baselines3 = {allow-prereleases = true, version = "^2.0.0a10"}
+tensorboard = "^2.13.0"
+torch = "^2.0.1"
+
+[tool.ruff]
+extend-ignore = ["D203", "D213"]
+extend-select = ["A", "B", "C", "COM", "DJ", "EM", "EXE", "G", "N", "PTH", "RET", "RUF", "UP", "W", "YTT"]
+target-version = "py38"
+
+[tool.tomlsort]
+all = true

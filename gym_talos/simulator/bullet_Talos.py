@@ -13,7 +13,6 @@ class TalosDeburringSimulator:
         enableGravity=True,
         dt=1e-3,
     ):
-
         self._setupBullet(enableGUI, enableGravity, dt)
 
         self._setupRobot(URDF, rmodelComplete, controlledJointsIDs)
@@ -191,7 +190,10 @@ class TalosDeburringSimulator:
             self.physicsClient,
         )
         p.resetBaseVelocity(
-            self.robotId, [0.0, 0.0, 0.0], [0.0, 0.0, 0.0], self.physicsClient
+            self.robotId,
+            [0.0, 0.0, 0.0],
+            [0.0, 0.0, 0.0],
+            self.physicsClient,
         )
         # Reset joints
         for i in range(len(self.initial_joint_positions)):

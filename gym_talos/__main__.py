@@ -1,9 +1,9 @@
 import argparse
 import datetime
 import shutil
+
 import torch
 import yaml
-
 from stable_baselines3 import SAC
 from stable_baselines3.common.env_util import SubprocVecEnv
 from stable_baselines3.common.monitor import Monitor
@@ -34,7 +34,7 @@ config_filename = str(args.configurationFile)
 training_id = args.identication
 
 # Parsing configuration file
-with open(config_filename, "r") as config_file:
+with open(config_filename) as config_file:
     params = yaml.safe_load(config_file)
 
 params_designer = params["robot_designer"]
@@ -68,7 +68,7 @@ if number_environments == 1:
 else:
     env_training = SubprocVecEnv(
         number_environments
-        * [lambda: Monitor(EnvTalosDeburring(params_designer, params_env, GUI=False))]
+        * [lambda: Monitor(EnvTalosDeburring(params_designer, params_env, GUI=False))],
     )
 
 # Create Agent

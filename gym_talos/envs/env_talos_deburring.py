@@ -1,9 +1,9 @@
 import gym
 import numpy as np
 
-from ..utils.modelLoader import TalosDesigner
-
 from gym_talos.simulator.bullet_Talos import TalosDeburringSimulator
+
+from ..utils.modelLoader import TalosDesigner
 
 
 class EnvTalosDeburring(gym.Env):
@@ -78,7 +78,7 @@ class EnvTalosDeburring(gym.Env):
         self.timer = 0
 
         self.maxStep = int(
-            self.maxTime / (self.timeStepSimulation * self.numSimulationSteps)
+            self.maxTime / (self.timeStepSimulation * self.numSimulationSteps),
         )
 
         if self.normalizeObs:
@@ -88,19 +88,28 @@ class EnvTalosDeburring(gym.Env):
 
         action_dim = action_dimension
         self.action_space = gym.spaces.Box(
-            low=-1, high=1, shape=(action_dim,), dtype=np.float32
+            low=-1,
+            high=1,
+            shape=(action_dim,),
+            dtype=np.float32,
         )
 
         observation_dim = observation_dimension
         if self.normalizeObs:
             observation_dim = len(self.simulator.getRobotState())
             self.observation_space = gym.spaces.Box(
-                low=-1, high=1, shape=(observation_dim,), dtype=np.float64
+                low=-1,
+                high=1,
+                shape=(observation_dim,),
+                dtype=np.float64,
             )
         else:
             observation_dim = len(self.simulator.getRobotState())
             self.observation_space = gym.spaces.Box(
-                low=-5, high=5, shape=(observation_dim,), dtype=np.float64
+                low=-5,
+                high=5,
+                shape=(observation_dim,),
+                dtype=np.float64,
             )
 
     def close(self):
@@ -210,7 +219,7 @@ class EnvTalosDeburring(gym.Env):
         reward_command = -np.linalg.norm(torques)
         # target distance
         reward_toolPosition = -np.linalg.norm(
-            self.pinWrapper.get_end_effector_pos() - self.targetPos
+            self.pinWrapper.get_end_effector_pos() - self.targetPos,
         )
 
         reward = (

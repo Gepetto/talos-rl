@@ -1,7 +1,6 @@
 import gym
 import numpy as np
 import pinocchio as pin
-
 from deburring_mpc import RobotDesigner
 
 from gym_talos.simulator.bullet_Talos import TalosDeburringSimulator
@@ -9,7 +8,6 @@ from gym_talos.simulator.bullet_Talos import TalosDeburringSimulator
 
 class EnvTalosBase(gym.Env):
     def __init__(self, params_designer, params_env, GUI=False) -> None:
-
         # Parameters
         self.numSimulationSteps = params_env["numSimulationSteps"]
         self.normalizeObs = params_env["normalizeObs"]
@@ -34,7 +32,9 @@ class EnvTalosBase(gym.Env):
         gripper_SE3_tool.translation[1] = params_designer["toolFramePos"][1]
         gripper_SE3_tool.translation[2] = params_designer["toolFramePos"][2]
         self.pinWrapper.add_end_effector_frame(
-            "deburring_tool", "gripper_left_fingertip_3_link", gripper_SE3_tool
+            "deburring_tool",
+            "gripper_left_fingertip_3_link",
+            gripper_SE3_tool,
         )
 
         # Simulator
@@ -54,18 +54,27 @@ class EnvTalosBase(gym.Env):
 
         action_dim = len(params_designer["controlled_joints_names"]) - 1
         self.action_space = gym.spaces.Box(
-            low=-1, high=1, shape=(action_dim,), dtype=np.float32
+            low=-1,
+            high=1,
+            shape=(action_dim,),
+            dtype=np.float32,
         )
 
         if self.normalizeObs:
             observation_dim = self.desired_state.size
             self.observation_space = gym.spaces.Box(
-                low=-1, high=1, shape=(observation_dim,), dtype=np.float64
+                low=-1,
+                high=1,
+                shape=(observation_dim,),
+                dtype=np.float64,
             )
         else:
             observation_dim = self.desired_state.size
             self.observation_space = gym.spaces.Box(
-                low=-5, high=5, shape=(observation_dim,), dtype=np.float64
+                low=-5,
+                high=5,
+                shape=(observation_dim,),
+                dtype=np.float64,
             )
 
     def reset(self, *, seed=None, options=None):

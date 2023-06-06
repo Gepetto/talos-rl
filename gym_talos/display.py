@@ -1,6 +1,6 @@
 import yaml
-
 from stable_baselines3 import SAC
+
 from .envs.env_talos_deburring import EnvTalosDeburring
 
 training_name = "2023-06-01_test_1"
@@ -11,10 +11,14 @@ config_path = log_dir + training_name + "/" + training_name[:-2] + ".yaml"
 
 model = SAC.load(model_path)
 
-with open(config_path, "r") as config_file:
+with open(config_path) as config_file:
     params = yaml.safe_load(config_file)
 
-envDisplay = EnvTalosDeburring(params["robot_designer"], params["environment"], GUI=True)
+envDisplay = EnvTalosDeburring(
+    params["robot_designer"],
+    params["environment"],
+    GUI=True,
+)
 envDisplay.maxTime = 1000
 obs = envDisplay.reset()
 while True:

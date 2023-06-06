@@ -10,7 +10,7 @@
 #SBATCH --error=output/output-%A-%a-%N.err     ### Error outpour STDERR
 
 # Sleep time depends on task ID to prevent all tasks from starting simultaneously
-sleep ${SLURM_ARRAY_TASK_ID} && \ 
+sleep ${SLURM_ARRAY_TASK_ID} && \
     apptainer run --no-home \
     --bind /pfcalcul/work/cperrot/logs:/logs \
     --bind /pfcalcul/work/cperrot/config:/config \

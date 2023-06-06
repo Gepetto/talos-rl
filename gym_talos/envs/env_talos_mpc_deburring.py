@@ -1,15 +1,13 @@
 import gym
 import numpy as np
 import pinocchio as pin
-
-from deburring_mpc import OCP, OCPSettings, RobotDesigner
+from deburring_mpc import RobotDesigner
 
 from gym_talos.simulator.bullet_Talos import TalosDeburringSimulator
 
 
 class EnvTalosBase(gym.Env):
     def __init__(self, params_env, params_designer, param_ocp, GUI=False) -> None:
-
         self._init_parameters(params_env)
 
         # Robot wrapper
@@ -21,7 +19,9 @@ class EnvTalosBase(gym.Env):
         gripper_SE3_tool.translation[1] = params_designer["toolFramePos"][1]
         gripper_SE3_tool.translation[2] = params_designer["toolFramePos"][2]
         self.pinWrapper.add_end_effector_frame(
-            "deburring_tool", "gripper_left_fingertip_3_link", gripper_SE3_tool
+            "deburring_tool",
+            "gripper_left_fingertip_3_link",
+            gripper_SE3_tool,
         )
 
         self.rmodel = self.pinWrapper.get_rmodel()
@@ -92,7 +92,7 @@ class EnvTalosBase(gym.Env):
         self.timer = 0
 
         self.maxStep = int(
-            self.maxTime / (self.timeStepSimulation * self.numSimulationSteps)
+            self.maxTime / (self.timeStepSimulation * self.numSimulationSteps),
         )
 
         if self.normalizeObs:
@@ -102,19 +102,28 @@ class EnvTalosBase(gym.Env):
 
         action_dim = action_dimension
         self.action_space = gym.spaces.Box(
-            low=-1, high=1, shape=(action_dim,), dtype=np.float32
+            low=-1,
+            high=1,
+            shape=(action_dim,),
+            dtype=np.float32,
         )
 
         observation_dim = observation_dimension
         if self.normalizeObs:
             observation_dim = len(self.simulator.getRobotState())
             self.observation_space = gym.spaces.Box(
-                low=-1, high=1, shape=(observation_dim,), dtype=np.float64
+                low=-1,
+                high=1,
+                shape=(observation_dim,),
+                dtype=np.float64,
             )
         else:
             observation_dim = len(self.simulator.getRobotState())
             self.observation_space = gym.spaces.Box(
-                low=-5, high=5, shape=(observation_dim,), dtype=np.float64
+                low=-5,
+                high=5,
+                shape=(observation_dim,),
+                dtype=np.float64,
             )
 
     def close(self):
@@ -224,7 +233,7 @@ class EnvTalosBase(gym.Env):
         reward_command = -np.linalg.norm(torques)
         # target distance
         reward_toolPosition = -np.linalg.norm(
-            self.pinWrapper.get_end_effector_pos() - self.targetPos
+            self.pinWrapper.get_end_effector_pos() - self.targetPos,
         )
 
         reward = (

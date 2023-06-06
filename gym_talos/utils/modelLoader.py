@@ -1,5 +1,5 @@
-import numpy as np
 import example_robot_data
+import numpy as np
 import pinocchio as pin
 
 
@@ -10,7 +10,8 @@ class TalosDesigner:
 
         if True:
             self.rmodelComplete = pin.buildModelFromUrdf(
-                self.URDF_path, pin.JointModelFreeFlyer()
+                self.URDF_path,
+                pin.JointModelFreeFlyer(),
             )
         else:
             self.rmodelComplete = pin.buildModelFromUrdf(self.URDF_path)
@@ -35,7 +36,8 @@ class TalosDesigner:
 
         pin.loadRotorParameters(model, modelPath + SRDF, False)
         model.armature = np.multiply(
-            model.rotorInertia.flat, np.square(model.rotorGearRatio.flat)
+            model.rotorInertia.flat,
+            np.square(model.rotorGearRatio.flat),
         )
 
         pin.loadReferenceConfigurations(model, modelPath + SRDF, False)
@@ -90,7 +92,9 @@ class TalosDesigner:
         ]
 
         self.rmodel = pin.buildReducedModel(
-            self.rmodelComplete, lockedJointsID, self.q0Complete
+            self.rmodelComplete,
+            lockedJointsID,
+            self.q0Complete,
         )
         self.rdata = self.rmodel.createData()
 
@@ -103,7 +107,10 @@ class TalosDesigner:
         pin.updateFramePlacements(self.rmodel, self.rdata)
 
         self.CoM = pin.centerOfMass(
-            self.rmodel, self.rdata, x_measured[:self.rmodel.nq], False
+            self.rmodel,
+            self.rdata,
+            x_measured[: self.rmodel.nq],
+            False,
         )
         self.oMtool = self.rdata.oMf[self.endEffectorId]
 
