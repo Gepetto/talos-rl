@@ -24,7 +24,7 @@ torch = "^2.0.1"
 
 [tool.ruff]
 extend-ignore = ["D203", "D213"]
-extend-select = ["A", "B", "C", "COM", "DJ", "EM", "EXE", "G", "N", "PTH", "RET", "RUF", "UP", "W", "YTT"]
+extend-select = ["A", "B", "C", "COM", "DJ", "EM", "EXE", "G", "PTH", "RET", "RUF", "UP", "W", "YTT"]
 target-version = "py38"
 
 [tool.tomlsort]
