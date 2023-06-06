@@ -1,5 +1,6 @@
 import argparse
 import datetime
+import pathlib
 import shutil
 
 import torch
@@ -19,7 +20,10 @@ parser.add_argument(
     "-id",
     "--identication",
     default=None,
-    help="Identification number for the training (usefull when launching several trainings in parallel)",
+    help=(
+        "Identification number for the training (usefull when launching several "
+        "trainings in parallel)"
+    ),
     type=int,
 )
 parser.add_argument(
@@ -30,11 +34,11 @@ parser.add_argument(
 )
 
 args = parser.parse_args()
-config_filename = str(args.configurationFile)
+config_filename = pathlib.Path(args.configurationFile)
 training_id = args.identication
 
 # Parsing configuration file
-with open(config_filename) as config_file:
+with config_filename.open() as config_file:
     params = yaml.safe_load(config_file)
 
 params_designer = params["robot_designer"]

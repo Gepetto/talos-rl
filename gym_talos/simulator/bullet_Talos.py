@@ -165,7 +165,7 @@ class TalosDeburringSimulator:
         # Magic transformation of the basis translation, as classical in Bullet.
         # x[:3] -= self.localInertiaPos
 
-        return x
+        return x  # noqa: RET504
 
     def step(self, torques):
         """Do one step of simulation"""

@@ -104,10 +104,7 @@ class EnvTalosBase(gym.Env):
         self.simulator.end()
 
     def _getObservation(self, x_measured):
-        if self.normalizeObs:
-            return self._obsNormalizer(x_measured)
-        else:
-            return x_measured
+        return self._obsNormalizer(x_measured) if self.normalizeObs else x_measured
 
     def _getReward(self, action, observation):
         # Posture reward + command regularization
@@ -115,13 +112,11 @@ class EnvTalosBase(gym.Env):
         reward_command = -np.linalg.norm(action)
         reward_alive = 1
 
-        reward = (
+        return (
             self.weight_posture * reward_posture
             + self.weight_command * reward_command
             + self.weight_alive * reward_alive
         )
-
-        return reward
 
     def _checkTermination(self, x_measured):
         stop_time = self.timer > (self.maxTime - 1)

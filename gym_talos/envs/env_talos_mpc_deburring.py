@@ -139,8 +139,10 @@ class EnvTalosBase(gym.Env):
         Brings the robot back to its half-sitting position
 
         Args:
-            seed: seed that is used to initialize the environment's PRNG. Defaults to None.
-            options: Additional information that can be specified to reset the environment. Defaults to None.
+            seed: seed that is used to initialize the environment's PRNG.
+                Defaults to None.
+            options: Additional information can be specified to reset the environment.
+                Defaults to None.
 
         Returns:
             Observation of the initial state.
@@ -151,15 +153,15 @@ class EnvTalosBase(gym.Env):
         x_measured = self.simulator.getRobotState()
         self.pinWrapper.update_reduced_model(x_measured)
 
-        observation = self._getObservation(x_measured)
-
-        return observation
+        return self._getObservation(x_measured)
 
     def step(self, action):
         """Execute a step of the environment
 
-        One step of the environment is numSimulationSteps of the simulator with the same command.
-        The model of the robot is updated using the observation taken from the environment.
+        One step of the environment is numSimulationSteps of the simulator with the same
+        command.
+        The model of the robot is updated using the observation taken from the
+        environment.
         The termination and condition are checked and the reward is computed.
 
         Args:
@@ -211,7 +213,8 @@ class EnvTalosBase(gym.Env):
         """Compute step reward
 
         The reward is composed of:
-            - A bonus when the environment is still alive (no constraint has been infriged)
+            - A bonus when the environment is still alive (no constraint has been
+              infriged)
             - A cost proportional to the norm of the torques
             - A cost proportional to the distance of the end-effector to the target
 
@@ -236,12 +239,11 @@ class EnvTalosBase(gym.Env):
             self.pinWrapper.get_end_effector_pos() - self.targetPos,
         )
 
-        reward = (
+        return (
             self.weight_target * reward_toolPosition
             + self.weight_command * reward_command
             + self.weight_truncation * reward_alive
         )
-        return reward
 
     def _checkTermination(self, x_measured):
         """Check the termination conditions.
@@ -255,9 +257,7 @@ class EnvTalosBase(gym.Env):
         Returns:
             True if the environment has been terminated, False otherwise
         """
-        stop_time = self.timer > (self.maxStep - 1)
-        termination = stop_time
-        return termination
+        return self.timer > (self.maxStep - 1)
 
     def _checkTruncation(self, x_measured):
         """Checks the truncation conditions.
@@ -292,8 +292,7 @@ class EnvTalosBase(gym.Env):
         truncation_limits = truncation_limits_position or truncation_limits_speed
 
         # Explicitely casting from numpy.bool_ to bool
-        truncation = bool(truncation_balance or truncation_limits)
-        return truncation
+        return bool(truncation_balance or truncation_limits)
 
     def _scaleAction(self, action):
         """Scales normalized actions to obtain robot torques
@@ -304,8 +303,7 @@ class EnvTalosBase(gym.Env):
         Returns:
             torque array
         """
-        torques = self.torqueScale * action
-        return torques
+        return self.torqueScale * action
 
     def _init_obsNormalizer(self):
         """Initializes the observation normalizer using robot model limits"""
@@ -335,5 +333,4 @@ class EnvTalosBase(gym.Env):
         Returns:
             normalized observation
         """
-        observation = (x_measured - self.avgObs) / self.diffObs
-        return observation
+        return (x_measured - self.avgObs) / self.diffObs
