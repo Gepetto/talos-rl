@@ -1,0 +1,21 @@
+[tool.poetry]
+name = "talos-rl"
+version = "0.1.0"
+description = "Tools to do Reinforcement Learning on Talos"
+authors = ["Côme Perrot <cperrot@laas.fr>"]
+license = "BSD-2-Clause"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.8"
+example-robot-data = "^4.0.7"
+torch = "^2.0.1"
+tensorboard = "^2.13.0"
+PyYAML = "^6.0"
+stable-baselines3 = {version = "^2.0.0a10", allow-prereleases = true}
+pybullet = "^3.2.5"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
