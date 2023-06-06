@@ -19,3 +19,18 @@ pybullet = "^3.2.5"
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
+
+
+[tool.ruff]
+extend-exclude = ["migrations"]
+extend-ignore = ["D203", "D213"]
+extend-select = ["A", "B", "C", "COM", "DJ", "EM", "EXE", "G", "N", "PTH", "RET", "RUF", "UP", "W", "YTT"]
+target-version = "py310"
+
+[tool.tomlsort]
+all = true
+
+
+[tool.isort]
+profile = "black"
+
