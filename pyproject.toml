@@ -6,10 +6,12 @@ requires = ["poetry-core"]
 profile = "black"
 
 [tool.poetry]
-authors = ["Côme Perrot <cperrot@laas.fr>"]
+authors = ["Côme Perrot <come.perrot@laas.fr>"]
 description = "Tools to do Reinforcement Learning on Talos"
 license = "BSD-2-Clause"
+maintainers = ["Guilhem Saurel <guilhem.saurel@laas.fr>"]
 name = "talos-rl"
+packages = [{include = "gym_talos"}]
 readme = "README.md"
 version = "0.1.0"
 
@@ -20,6 +22,12 @@ pybullet = "^3.2.5"
 python = "^3.8"
 stable-baselines3 = {allow-prereleases = true, version = "^2.0.0a10"}
 tensorboard = "^2.13.0"
+torch = {source = "torch-cpu", version = "^2.0.1"}
+
+[[tool.poetry.source]]
+name = "torch-cpu"
+priority = "explicit"
+url = "https://download.pytorch.org/whl/cpu"
 
 [tool.ruff]
 extend-ignore = ["D203", "D213"]

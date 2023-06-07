@@ -7,11 +7,14 @@
 
 ## Install
 
-(Please use a `venv` or similar, with an up-to-date `pip`)
+Please use a `venv` or similar, with an up-to-date `pip`, and:
 
 ```
 pip install .
 ```
+
+(you can also use poetry)
+
 
 ## Run
 
