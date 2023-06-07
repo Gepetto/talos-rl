@@ -1,6 +1,5 @@
-numpy==1.24.3
 stable-baselines3
 pybullet
 pyyaml
-# example-robot-data
+example-robot-data
 tensorboard

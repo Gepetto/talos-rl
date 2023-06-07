@@ -1,26 +1,15 @@
 Bootstrap: docker
-From: ubuntu:20.04
+From: python:3.11
 
 %files
-    apptainer/robotpkg.key
-    apptainer/requirements.txt
     gym_talos
+    config
+    pyproject.toml
+    poetry.lock
 
 %post
-    apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y gnupg2
-    apt-key add apptainer/robotpkg.key
-    echo "deb [arch=amd64] http://robotpkg.openrobots.org/packages/debian/pub focal robotpkg" > /etc/apt/sources.list.d/robotpkg.list
-    apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y  \
-        robotpkg-py38-example-robot-data \
-        python3-pip
+    pip install -U pip
+    pip install .
 
-    pip install --upgrade pip
-    pip install --no-cache-dir -r apptainer/requirements.txt
-
-    echo "/opt/openrobots/lib/python3.8/site-packages" > /usr/lib/python3/dist-packages/robotpkg.pth
-
-%appfiles train
-    gym_talos
-
-%apprun train
-    exec python3 -m gym_talos -config ./config/config_RL.yaml
+%runscript
+    exec python3 -m gym_talos -config /config/config_RL.yaml

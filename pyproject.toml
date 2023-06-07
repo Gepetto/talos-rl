@@ -20,7 +20,6 @@ pybullet = "^3.2.5"
 python = "^3.8"
 stable-baselines3 = {allow-prereleases = true, version = "^2.0.0a10"}
 tensorboard = "^2.13.0"
-torch = "^2.0.1"
 
 [tool.ruff]
 extend-ignore = ["D203", "D213"]
