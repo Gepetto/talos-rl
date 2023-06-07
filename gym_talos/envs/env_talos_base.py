@@ -84,7 +84,7 @@ class EnvTalosBase(gym.Env):
         x_measured = self.simulator.getRobotState()
         self.pinWrapper.update_reduced_model(x_measured)
 
-        return np.float32(self.pinWrapper.get_x0())
+        return np.float32(self.pinWrapper.get_x0()), {}
 
     def step(self, action):
         self.timer += 1
@@ -97,8 +97,9 @@ class EnvTalosBase(gym.Env):
         observation = self._getObservation(x_measured)
         reward = self._getReward(action, observation)
         terminated = self._checkTermination(x_measured)
+        truncated = self._checkTruncation(x_measured)
 
-        return observation, reward, terminated, {}
+        return observation, reward, terminated, truncated, {}
 
     def close(self):
         self.simulator.end()

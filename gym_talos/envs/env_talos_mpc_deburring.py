@@ -153,7 +153,7 @@ class EnvTalosBase(gym.Env):
         x_measured = self.simulator.getRobotState()
         self.pinWrapper.update_reduced_model(x_measured)
 
-        return self._getObservation(x_measured)
+        return self._getObservation(x_measured), {}
 
     def step(self, action):
         """Execute a step of the environment
@@ -187,10 +187,7 @@ class EnvTalosBase(gym.Env):
         truncated = self._checkTruncation(x_measured)
         reward = self._getReward(torques, x_measured, terminated, truncated)
 
-        # No difference between termination and truncation in this version of Gym
-        done = terminated or truncated
-
-        return observation, reward, done, {}
+        return observation, reward, terminated, truncated, {}
 
     def _getObservation(self, x_measured):
         """Formats observations

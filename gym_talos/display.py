@@ -22,11 +22,11 @@ envDisplay = EnvTalosDeburring(
     GUI=True,
 )
 envDisplay.maxTime = 1000
-obs = envDisplay.reset()
+obs, info = envDisplay.reset()
 while True:
     action, _ = model.predict(obs, deterministic=True)
-    _, _, done, _ = envDisplay.step(action)
-    if done:
+    _, _, terminated, truncated, _ = envDisplay.step(action)
+    if terminated or truncated:
         input("Press to any key restart")
         envDisplay.reset()
 envDisplay.close()
