@@ -12,9 +12,7 @@ From: mambaorg/micromamba
 %post
     micromamba env create -f environment.yml
     micromamba clean --all --yes
-    micromamba run -n talos-rl python -m pip install pipx
-    micromamba run -n talos-rl python -m pipx install poetry
-    micromamba run -n talos-rl /root/.local/bin/poetry install --without deps
+    micromamba run -n talos-rl python -m pip install .
 
 %runscript
     exec micromamba run -n talos-rl python -m gym_talos -config /config/config_RL.yaml

@@ -12,7 +12,7 @@
 Please use a `venv` or similar, with an up-to-date `pip`, and:
 
 ```
-pip install .
+pip install .[deps]
 ```
 
 ### Run
@@ -26,7 +26,7 @@ python -m gym_talos -config config/config_RL.yaml
 ### Install
 
 ```
-poetry install
+poetry install -E deps
 ```
 
 ### Run
@@ -67,10 +67,6 @@ apptainer run rl_mamba.sif
 
 ## Apptainer + pip
 
-Currently not available
-
-## Apptainer + poetry
-
 ### Build
 
 ```
@@ -81,4 +77,18 @@ apptainer build rl.sif apptainer/rl.def
 
 ```
 apptainer run rl.sif
+```
+
+## Apptainer + poetry
+
+### Build
+
+```
+apptainer build rl_poetry.sif apptainer/rl_poetry.def
+```
+
+### Run
+
+```
+apptainer run rl_poetry.sif
 ```

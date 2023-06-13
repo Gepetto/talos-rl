@@ -9,10 +9,7 @@ From: python:3.11
     README.md
 
 %post
-    pip install pipx
-    pipx install poetry
-    /root/.local/bin/poetry config virtualenvs.in-project true
-    /root/.local/bin/poetry install
+    pip install .[deps]
 
 %runscript
-    exec /root/.local/bin/poetry run python -m gym_talos -config /config/config_RL.yaml
+    exec python -m gym_talos -config /config/config_RL.yaml

@@ -16,7 +16,7 @@ jobs:
         with:
           python-version: "${{ matrix.python-version }}"
           cache: poetry
-      - run: poetry install
+      - run: poetry install -E deps
       - run: poetry run -m gym_talos -config config/config_RL.yaml
 
   mamba:
