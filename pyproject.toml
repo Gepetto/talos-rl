@@ -16,10 +16,14 @@ readme = "README.md"
 version = "0.1.0"
 
 [tool.poetry.dependencies]
-PyYAML = "^6.0"
+python = "^3.8"
+
+[tool.poetry.group.deps.dependencies]
+# This group allow to install this package as "poetry install --without deps"
+# eg. when deps are already provided by conda, and pip might try to mess with them
 example-robot-data = "^4.0.7"
 pybullet = "^3.2.5"
-python = "^3.8"
+pyyaml = "^6.0"
 stable-baselines3 = {allow-prereleases = true, version = "^2.0.0a10"}
 tensorboard = "^2.13.0"
 torch = {source = "torch-cpu", version = "^2.0.1"}
@@ -36,3 +40,14 @@ target-version = "py38"
 
 [tool.tomlsort]
 all = true
+
+[tool.poetry2conda]
+name = "talos-rl"
+
+[tool.poetry2conda.dependencies]
+example-robot-data = { channel = "conda-forge" }
+pybullet = { channel = "conda-forge" }
+pyyaml = { channel = "conda-forge" }
+stable-baselines3 = { channel = "pip" }  # because pre-release are not available on canda
+tensorboard = { channel = "conda-forge" }
+torch = { channel = "pytorch", name = "pytorch" }

@@ -1,5 +1,0 @@
-stable-baselines3
-pybullet
-pyyaml
-example-robot-data
-tensorboard
