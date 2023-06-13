@@ -17,7 +17,7 @@ jobs:
           python-version: "${{ matrix.python-version }}"
           cache: poetry
       - run: poetry install -E deps
-      - run: poetry run -m gym_talos -config config/config_RL.yaml
+      - run: poetry run python -m gym_talos -config config/config_RL.yaml
 
   mamba:
     name: "mamba, python ${{ matrix.python-version }}"
@@ -27,11 +27,10 @@ jobs:
         python-version: ["3.8", "3.9", "3.10", "3.11"]
     steps:
       - uses: actions/checkout@v3
-      - uses: mamba-org/provision-with-micromamba@v16
+      - uses: mamba-org/setup-micromamba@v1
         with:
-          extra-specs: |
-            python=${{ matrix.python-version }}
-          cache-env: true
-
-      - run: micromamba env create -f environment.yml
+          environment-file: environment.yml
+          create-args: python=${{ matrix.python-version }}
+          cache-environment: true
+          post-cleanup: 'all'
       - run: micromamba run -n talos-rl python -m gym_talos -config config/config_RL.yaml
