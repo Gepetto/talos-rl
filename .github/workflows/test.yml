@@ -34,4 +34,5 @@ jobs:
           environment-file: environment.yml
           init-shell: bash
           post-cleanup: 'all'
-      - run: micromamba run -n talos-rl python -m gym_talos -config config/config_RL.yaml
+      - run: python -m gym_talos -config config/config_RL.yaml
+        shell: micromamba-shell {0}
