@@ -7,15 +7,15 @@
 
 ## Local + pip
 
-### Install
+Please use a `venv` or similar, with an up-to-date `pip`
 
-Please use a `venv` or similar, with an up-to-date `pip`, and:
+#### Install
 
 ```
 pip install .[deps]
 ```
 
-### Run
+#### Run
 
 ```
 python -m gym_talos -config config/config_RL.yaml
@@ -23,13 +23,13 @@ python -m gym_talos -config config/config_RL.yaml
 
 ## Local + poetry
 
-### Install
+#### Install
 
 ```
 poetry install -E deps
 ```
 
-### Run
+#### Run
 
 ```
 poetry run -m gym_talos -config config/config_RL.yaml
@@ -39,13 +39,13 @@ poetry run -m gym_talos -config config/config_RL.yaml
 
 (here we use micromamba, but you can probably use your prefered conda flavor instead)
 
-### Install
+#### Install
 
 ```
 micromamba env create -f environment.yml
 ```
 
-### Run
+#### Run
 
 ```
 micromamba run -n talos-rl python -m gym_talos -config config/config_RL.yaml
@@ -53,13 +53,13 @@ micromamba run -n talos-rl python -m gym_talos -config config/config_RL.yaml
 
 ## Apptainer + mamba
 
-### Build
+#### Build
 
 ```
 apptainer build rl_mamba.sif apptainer/rl_mamba.def
 ```
 
-### Run
+#### Run
 
 ```
 apptainer run rl_mamba.sif
@@ -67,13 +67,13 @@ apptainer run rl_mamba.sif
 
 ## Apptainer + pip
 
-### Build
+#### Build
 
 ```
 apptainer build rl.sif apptainer/rl.def
 ```
 
-### Run
+#### Run
 
 ```
 apptainer run rl.sif
@@ -81,13 +81,13 @@ apptainer run rl.sif
 
 ## Apptainer + poetry
 
-### Build
+#### Build
 
 ```
 apptainer build rl_poetry.sif apptainer/rl_poetry.def
 ```
 
-### Run
+#### Run
 
 ```
 apptainer run rl_poetry.sif
