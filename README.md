@@ -51,20 +51,6 @@ micromamba env create -f environment.yml
 micromamba run -n talos-rl python -m gym_talos -config config/config_RL.yaml
 ```
 
-## Apptainer + mamba
-
-#### Build
-
-```
-apptainer build rl_mamba.sif apptainer/rl_mamba.def
-```
-
-#### Run
-
-```
-apptainer run rl_mamba.sif
-```
-
 ## Apptainer + pip
 
 #### Build
@@ -91,4 +77,18 @@ apptainer build rl_poetry.sif apptainer/rl_poetry.def
 
 ```
 apptainer run rl_poetry.sif
+```
+
+## Apptainer + mamba
+
+#### Build
+
+```
+apptainer build rl_mamba.sif apptainer/rl_mamba.def
+```
+
+#### Run
+
+```
+apptainer run rl_mamba.sif
 ```
