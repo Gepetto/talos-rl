@@ -3,7 +3,8 @@ name: Tests
 on: [push, pull_request]
 
 jobs:
-  test:
+  poetry:
+    name: "poetry, python ${{ matrix.python-version }}"
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -15,5 +16,22 @@ jobs:
         with:
           python-version: "${{ matrix.python-version }}"
           cache: poetry
-      - run: pip install .
-      - run: python -m gym_talos -config config/config_RL.yaml
+      - run: poetry install
+      - run: poetry run -m gym_talos -config config/config_RL.yaml
+
+  mamba:
+    name: "mamba, python ${{ matrix.python-version }}"
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.8", "3.9", "3.10", "3.11"]
+    steps:
+      - uses: actions/checkout@v3
+      - uses: mamba-org/provision-with-micromamba@v16
+        with:
+          extra-specs: |
+            python=${{ matrix.python-version }}
+          cache-env: true
+
+      - run: micromamba env create -f environment.yml
+      - run: micromamba run -n talos-rl python -m gym_talos -config config/config_RL.yaml

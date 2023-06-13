@@ -6,10 +6,13 @@ From: python:3.11
     config
     pyproject.toml
     poetry.lock
+    README.md
 
 %post
-    pip install -U pip
-    pip install .
+    pip install pipx
+    pipx install poetry
+    /root/.local/bin/poetry config virtualenvs.in-project true
+    /root/.local/bin/poetry install
 
 %runscript
-    exec python3 -m gym_talos -config /config/config_RL.yaml
+    exec /root/.local/bin/poetry run python -m gym_talos -config /config/config_RL.yaml

@@ -21,6 +21,7 @@ python = "^3.8"
 [tool.poetry.group.deps.dependencies]
 # This group allow to install this package as "poetry install --without deps"
 # eg. when deps are already provided by conda, and pip might try to mess with them
+# TODO: but this group is not fowrarded to "pip install ."
 example-robot-data = "^4.0.7"
 pybullet = "^3.2.5"
 pyyaml = "^6.0"
