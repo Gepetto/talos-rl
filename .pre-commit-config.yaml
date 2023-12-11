@@ -1,12 +1,12 @@
 repos:
 - repo: https://github.com/PyCQA/isort
-  rev: 5.12.0
+  rev: 5.13.1
   hooks:
   - id: isort
     args:
     - --filter-files
-- repo: https://github.com/charliermarsh/ruff-pre-commit
-  rev: v0.0.272
+- repo: https://github.com/astral-sh/ruff-pre-commit
+  rev: v0.1.7
   hooks:
   - id: ruff
     args:
@@ -22,7 +22,7 @@ repos:
   - id: toml-sort-fix
     exclude: poetry.lock
 - repo: https://github.com/pre-commit/pre-commit-hooks
-  rev: v4.4.0
+  rev: v4.5.0
   hooks:
   - id: check-added-large-files
   - id: check-ast
@@ -40,6 +40,6 @@ repos:
   - id: mixed-line-ending
   - id: trailing-whitespace
 - repo: https://github.com/psf/black
-  rev: 23.3.0
+  rev: 23.11.0
   hooks:
   - id: black
