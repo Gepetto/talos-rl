@@ -1,0 +1,20 @@
+pull_request_rules:
+  - name: merge automatically when CI passes and PR is approved
+    conditions:
+      - check-success = "mamba, python 3.8"
+      - check-success = "mamba, python 3.9"
+      - check-success = "mamba, python 3.10"
+      - check-success = "mamba, python 3.11"
+      - check-success = "mamba, python 3.12"
+      - check-success = "poetry, python 3.8"
+      - check-success = "poetry, python 3.9"
+      - check-success = "poetry, python 3.10"
+      - check-success = "poetry, python 3.11"
+      - check-success = "poetry, python 3.12"
+      - check-success = "pre-commit.ci - pr"
+      - or:
+        - author = pre-commit-ci[bot]
+        - author = dependabot[bot]
+        - approved-reviews-by = nim65s
+    actions:
+      merge:
