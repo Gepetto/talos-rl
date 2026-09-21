@@ -11,18 +11,18 @@ description = "Tools to do Reinforcement Learning on Talos"
 license = "BSD-2-Clause"
 maintainers = ["Guilhem Saurel <guilhem.saurel@laas.fr>"]
 name = "talos-rl"
-packages = [{include = "gym_talos"}]
+packages = [{ include = "gym_talos" }]
 readme = "README.md"
 version = "0.1.0"
 
 [tool.poetry.dependencies]
-example-robot-data = {optional = true, version = "^4.0.7"}
-pybullet = {optional = true, version = "^3.2.5"}
+example-robot-data = { optional = true, version = "^4.0.7" }
+pybullet = { optional = true, version = "^3.2.5" }
 python = "^3.8"
-pyyaml = {optional = true, version = "^6.0"}
-stable-baselines3 = {allow-prereleases = true, optional = true, version = "^2.0.0a10"}
-tensorboard = {optional = true, version = "^2.13.0"}
-torch = {optional = true, source = "torch-cpu", version = "^2.0.1"}
+pyyaml = { optional = true, version = "^6.0" }
+stable-baselines3 = { allow-prereleases = true, optional = true, version = "^2.0.0a10" }
+tensorboard = { optional = true, version = "^2.13.0" }
+torch = { optional = true, source = "torch-cpu", version = "^2.0.1" }
 
 [tool.poetry.extras]
 deps = ["example-robot-data", "pybullet", "pyyaml", "stable-baselines3", "tensorboard", "torch"]
@@ -36,12 +36,12 @@ url = "https://download.pytorch.org/whl/cpu"
 name = "talos-rl"
 
 [tool.poetry2conda.dependencies]
-example-robot-data = {channel = "conda-forge"}
-pybullet = {channel = "conda-forge"}
-pyyaml = {channel = "conda-forge"}
-stable-baselines3 = {channel = "pip"} # because pre-release are not available on canda
-tensorboard = {channel = "conda-forge"}
-torch = {channel = "pytorch", name = "pytorch"}
+example-robot-data = { channel = "conda-forge" }
+pybullet = { channel = "conda-forge" }
+pyyaml = { channel = "conda-forge" }
+stable-baselines3 = { channel = "pip" } # because pre-release are not available on canda
+tensorboard = { channel = "conda-forge" }
+torch = { channel = "pytorch", name = "pytorch" }
 
 [tool.ruff]
 extend-ignore = ["D203", "D213"]
